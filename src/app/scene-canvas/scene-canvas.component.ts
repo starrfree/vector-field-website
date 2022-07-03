@@ -1,8 +1,8 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { mat4 } from 'gl-matrix';
-import { Observable, fromEvent } from 'rxjs';
-import { DeviceDetectorService } from 'ngx-device-detector';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
+import { HttpClient } from '@angular/common/http'
+import { mat4 } from 'gl-matrix'
+import { Observable, fromEvent } from 'rxjs'
+import { DeviceDetectorService } from 'ngx-device-detector'
 
 @Component({
   selector: 'app-scene-canvas',
@@ -10,255 +10,283 @@ import { DeviceDetectorService } from 'ngx-device-detector';
   styleUrls: ['./scene-canvas.component.css']
 })
 export class SceneCanvasComponent implements OnInit {
-  @ViewChild('glCanvas') private canvas!: ElementRef;
-  vsSource = "";
-  fsSource = "";
-  squareRotation = 0.0;
-  mousePosition: [number, number] = [0.0, 0.0];
-  mouseIsActive: boolean = false;
-  sourcesPosition: [number, number][] = [[100, 600], [100, 200]]
+  @ViewChild('glCanvas') private canvas!: ElementRef
+  particleCount: number = 1000000
+  mousePosition: [number, number] = [0.0, 0.0]
+  mouseIsActive: boolean = false
+  fps: number = 1.0/120
+
+  fpsColor = () => {
+    if (this.fps >= 60) {
+      return "lightgreen"
+    } else if (this.fps >= 30) {
+      return "orange"
+    } else {
+      return "lightred"
+    }
+  }
+
+  updateVertexSource = ""
+  updateFragmentSource = ""
+  renderVertexSource = ""
+  renderFragmentSource = ""
+  buffers!: any
 
   constructor(private http: HttpClient, private deviceService: DeviceDetectorService) {}
 
   ngOnInit(): void {}
 
   ngAfterViewInit(): void {
-    this.http.get("shaders/scene-vertex.glsl", {responseType: 'text'})
+    this.http.get("shaders/particle-update-vertex.glsl", {responseType: 'text'})
       .subscribe(res => {
-        this.vsSource = res;
-        this.http.get("shaders/scene-fragment.glsl", {responseType: 'text'})
+        this.updateVertexSource = res
+        this.http.get("shaders/particle-rendering-vertex.glsl", {responseType: 'text'})
           .subscribe(res => {
-            this.fsSource = res;
-            this.main();
+            this.renderVertexSource = res
+            this.http.get("shaders/particle-rendering-fragment.glsl", {responseType: 'text'})
+            .subscribe(res => {
+              this.renderFragmentSource = res
+              this.http.get("shaders/particle-update-fragment.glsl", {responseType: 'text'})
+                .subscribe(res => {
+                  this.updateFragmentSource = res
+                  this.main()
+                })
+            })
           })
       })
   }
 
   main(): any {
-    const gl = this.canvas.nativeElement.getContext("webgl");
+    const gl = this.canvas.nativeElement.getContext("webgl2")
     if (gl === null) {
       console.error("Unable to initialize WebGL")
-      alert("Unable to initialize WebGL. Your browser or machine may not support it.");
-      return;
+      alert("Unable to initialize WebGL. Your browser or machine may not support it.")
+      return
     }
-
-    const shaderProgram = this.initShaderProgram(gl, this.vsSource, this.fsSource)
+    this.buffers = this.initBuffers(gl)
+    const updateShaderProgram = this.initShaderProgram(gl, this.updateVertexSource, this.updateFragmentSource, ["o_Position", "o_Velocity"])
+    const renderShaderProgram = this.initShaderProgram(gl, this.renderVertexSource, this.renderFragmentSource)
 
     const programInfo = {
-      program: shaderProgram,
+      updateProgram: updateShaderProgram,
+      renderProgram: renderShaderProgram,
       attribLocations: {
-        vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-        vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor')
-      },
-      uniformLocations: {
-        projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-        // modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
-        sources: gl.getUniformLocation(shaderProgram, 'uSourcePositions'),
-      },
-    };
+        update: {
+          positionInput: gl.getAttribLocation(updateShaderProgram, 'i_Position'),
+          velocityInput: gl.getAttribLocation(updateShaderProgram, 'i_Velocity'),
+          positionOutput: gl.getAttribLocation(updateShaderProgram, 'o_Position'),
+          velocityOutput: gl.getAttribLocation(updateShaderProgram, 'o_Velocity')
+        },
+        render: {
+          position: gl.getAttribLocation(renderShaderProgram, 'i_Position'),
+          velocity: gl.getAttribLocation(renderShaderProgram, 'i_Velocity')
+        }
+      }
+    }
 
-    const buffers = this.initBuffers(gl);
-    this.drawScene(gl, buffers, programInfo);
-
-    // var render = (time: number) => {
-    //   this.squareRotation = -time / 1000;
-    //   this.drawScene(gl, buffers, programInfo);
-    //   requestAnimationFrame(render);
-    // };
-    // requestAnimationFrame(render);
+    var last: number = 0
+    var render = (time: number) => {
+      this.fps = 1000 / (time - last)
+      this.drawScene(gl, programInfo)
+      last = time
+      requestAnimationFrame(render)
+    }
+    requestAnimationFrame(render)
 
     const moveMouse = (event: any) => {
       this.mousePosition = [event.pageX - 5, this.canvas.nativeElement.height - event.pageY + 5]
-      var minD: number | undefined = undefined;
-      var minIndex: number = 0;
-      for (let i = 0; i < this.sourcesPosition.length; i++) {
-        const source = this.sourcesPosition[i];
-        const d: number = (source[0] - this.mousePosition[0]) * (source[0] - this.mousePosition[0]) + (source[1] - this.mousePosition[1]) * (source[1] - this.mousePosition[1])
-        if ((minD == undefined || d < minD) && d < 100 * 100) {
-          minD = d;
-          minIndex = i;
-        }
-      }
-      if (minD != undefined) {
-        this.sourcesPosition[minIndex][0] = this.mousePosition[0];
-        this.sourcesPosition[minIndex][1] = this.mousePosition[1];
-      }
-      this.drawScene(gl, buffers, programInfo);
+      // this.drawScene(gl, programInfo)
     }
-
     if (this.deviceService.isMobile()) {
       console.log("Device is mobile")
       this.canvas.nativeElement.addEventListener('touchstart', (event: any) => {
         this.mouseIsActive = true
         moveMouse(event)
-        console.log("down")
-      }, false);
+      }, false)
       this.canvas.nativeElement.addEventListener('touchend', (event: any) => {
         this.mouseIsActive = false
-        console.log("up")
-      }, false);
+      }, false)
       this.canvas.nativeElement.addEventListener('touchmove', (event: any) => {
         if (this.mouseIsActive) {
           moveMouse(event)
         }
-        console.log("move")
-      }, false);
+
+      }, false)
     } else {
       this.canvas.nativeElement.addEventListener('mousedown', (event: any) => {
         this.mouseIsActive = true
         moveMouse(event)
-      }, false);
+      }, false)
       this.canvas.nativeElement.addEventListener('mouseup', (event: any) => {
         this.mouseIsActive = false
-      }, false);
+      }, false)
       this.canvas.nativeElement.addEventListener('mousemove', (event: any) => {
         if (this.mouseIsActive) {
           moveMouse(event)
         }
-      }, false);
+      }, false)
     }
 
     const resizeCanvas = () => {
-      this.canvas.nativeElement.width = this.canvas.nativeElement.clientWidth;
-      this.canvas.nativeElement.height = this.canvas.nativeElement.clientHeight;
-      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-      this.drawScene(gl, buffers, programInfo);
+      this.canvas.nativeElement.width = this.canvas.nativeElement.clientWidth
+      this.canvas.nativeElement.height = this.canvas.nativeElement.clientHeight
+      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+      this.drawScene(gl, programInfo)
     }
-
-    window.addEventListener('resize', resizeCanvas, false);
+    window.addEventListener('resize', resizeCanvas, false)
     resizeCanvas()
   }
 
-  private initShaderProgram(gl: any, vsSource: string, fsSource: string): any {
-    const vertexShader = this.loadShader(gl, gl.VERTEX_SHADER, vsSource);
-    const fragmentShader = this.loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
+  private initShaderProgram(gl: any, vsSource: string, fsSource: string, transform_feedback_varyings: string[] | null = null): any {
+    const vertexShader = this.loadShader(gl, gl.VERTEX_SHADER, vsSource)
+    const fragmentShader = this.loadShader(gl, gl.FRAGMENT_SHADER, fsSource)
 
-    const shaderProgram = gl.createProgram();
-    gl.attachShader(shaderProgram, vertexShader);
-    gl.attachShader(shaderProgram, fragmentShader);
-    gl.linkProgram(shaderProgram);
+    const shaderProgram = gl.createProgram()
+    gl.attachShader(shaderProgram, vertexShader)
+    gl.attachShader(shaderProgram, fragmentShader)
+    if (transform_feedback_varyings != null) {
+      gl.transformFeedbackVaryings(
+        shaderProgram,
+        transform_feedback_varyings,
+        gl.INTERLEAVED_ATTRIBS)
+    }  
+    gl.linkProgram(shaderProgram) 
 
     if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
       console.error("Unable to initialize the shader program: " + gl.getProgramInfoLog(shaderProgram))
-      alert("Unable to initialize the shader program: " + gl.getProgramInfoLog(shaderProgram));
-      return null;
+      // alert("Unable to initialize the shader program: " + gl.getProgramInfoLog(shaderProgram))
+      return null
     }
 
-    return shaderProgram;
+    return shaderProgram
   }
 
   private loadShader(gl: any, type: any, source: string): any {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
+    const shader = gl.createShader(type)
+    gl.shaderSource(shader, source)
+    gl.compileShader(shader)
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
       console.error("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader))
-      alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader));
-      gl.deleteShader(shader);
-      return null;
+      // alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader))
+      gl.deleteShader(shader)
+      return null
     }
-    return shader;
+    return shader
   }
 
-  initBuffers(gl: any) {
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    const positions = [
-      1.0,  1.0,
-     -1.0,  1.0,
-      1.0, -1.0,
-     -1.0, -1.0,
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+  initBuffers(gl: WebGLRenderingContext) {
+    const values: number[] = []
+    for (var i = 0; i < this.particleCount; i += 1) {
+      const r = () => (Math.random() * 2 - 1)
+      values.push(r())
+      values.push(r())
+  
+      values.push(r() * 3)
+      values.push(r() * 3)
+    }
 
-    const colors = [
-      1.0,  1.0,  1.0,  1.0,    // white
-      1.0,  0.0,  0.0,  1.0,    // red
-      0.0,  1.0,  0.0,  1.0,    // green
-      0.0,  0.0,  1.0,  1.0,    // blue
-    ];
-    const colorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+    const input = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, input)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(values), gl.STREAM_DRAW)
+
+    const output = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, output)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(values), gl.STREAM_DRAW)
 
     return {
-      position: positionBuffer,
-      color: colorBuffer
-    };
+      input: input,
+      output: output,
+    }
   }
 
-  drawScene(gl: any, buffers: any, programInfo: any) {
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clearDepth(1.0);
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    // const fieldOfView = 45 * Math.PI / 180;
-    // const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    // const zNear = 0.1;
-    // const zFar = 100.0;
-    // const projectionMatrix = mat4.create();
-    // mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
-    // mat4.ortho(projectionMatrix, -1, 1, -1, 1, zNear, zFar);
-
-    const modelViewMatrix = mat4.create();
-    mat4.translate(modelViewMatrix, modelViewMatrix, [-0.0, 0.0, -6.0]);
-    mat4.rotate(modelViewMatrix, modelViewMatrix, this.squareRotation, [0, 0, 1]);
+  drawScene(gl: any, programInfo: any) {
+    gl.clearColor(0.0, 0.0, 0.0, 1.0)
+    gl.clearDepth(1.0)
+    gl.enable(gl.DEPTH_TEST)
+    gl.depthFunc(gl.LEQUAL)
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    
     { 
-      const numComponents = 2;
-      const type = gl.FLOAT;
-      const normalize = false;
-      const stride = 0;
-      const offset = 0;
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+      var step = Float32Array.BYTES_PER_ELEMENT
+      const numComponents = 2
+      const type = gl.FLOAT
+      const normalize = false
+      const stride = 4 * step
+      const offset = 0
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.input)
       gl.vertexAttribPointer(
-        programInfo.attribLocations.vertexPosition,
+        programInfo.attribLocations.update.positionInput,
         numComponents,
         type,
         normalize,
         stride,
-        offset);
+        offset)
+      gl.enableVertexAttribArray(programInfo.attribLocations.update.positionInput)
     }
-    {
-      const numComponents = 4;
-      const type = gl.FLOAT;
-      const normalize = false;
-      const stride = 0;
-      const offset = 0;
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
+    { 
+      var step = Float32Array.BYTES_PER_ELEMENT
+      const numComponents = 2
+      const type = gl.FLOAT
+      const normalize = false
+      const stride = 4 * step
+      const offset = 2 * step
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.input)
       gl.vertexAttribPointer(
-          programInfo.attribLocations.vertexColor,
-          numComponents,
-          type,
-          normalize,
-          stride,
-          offset);
-      gl.enableVertexAttribArray(
-          programInfo.attribLocations.vertexColor);
+        programInfo.attribLocations.update.velocityInput,
+        numComponents,
+        type,
+        normalize,
+        stride,
+        offset)
+      gl.enableVertexAttribArray(programInfo.attribLocations.update.velocityInput)
     }
-    gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
-    gl.useProgram(programInfo.program);
+    gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, this.buffers.output)
+    gl.enable(gl.RASTERIZER_DISCARD)
+    gl.useProgram(programInfo.updateProgram)
+    gl.beginTransformFeedback(gl.POINTS)
+    gl.drawArrays(gl.POINTS, 0, this.particleCount)
+    gl.endTransformFeedback()
+    gl.disable(gl.RASTERIZER_DISCARD)
 
-    // gl.uniformMatrix4fv(
-    //   programInfo.uniformLocations.projectionMatrix,
-    //   false,
-    //   projectionMatrix);
-    gl.uniformMatrix4fv(
-        programInfo.uniformLocations.modelViewMatrix,
-        false,
-        modelViewMatrix);
-    var sources: number[] = [];
-    this.sourcesPosition.forEach(position => {
-      sources.push(position[0]);
-      sources.push(position[1]);
-    });
-    gl.uniform2fv(
-      programInfo.uniformLocations.sources,
-      new Float32Array(sources)
-    );
-    const vertexCount = 4;
-    const offset = 0;
-    gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+    { 
+      var step = Float32Array.BYTES_PER_ELEMENT
+      const numComponents = 2
+      const type = gl.FLOAT
+      const normalize = false
+      const stride = 4 * step
+      const offset = 0
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.input)
+      gl.vertexAttribPointer(
+        programInfo.attribLocations.render.positionInput,
+        numComponents,
+        type,
+        normalize,
+        stride,
+        offset)
+      gl.enableVertexAttribArray(programInfo.attribLocations.render.positionInput)
+    }
+    // { 
+    //   var step = Float32Array.BYTES_PER_ELEMENT
+    //   const numComponents = 2
+    //   const type = gl.FLOAT
+    //   const normalize = false
+    //   const stride = 4 * step
+    //   const offset = 2 * step
+    //   gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.input)
+    //   gl.vertexAttribPointer(
+    //     programInfo.attribLocations.render.velocityInput,
+    //     numComponents,
+    //     type,
+    //     normalize,
+    //     stride,
+    //     offset)
+    //   gl.enableVertexAttribArray(programInfo.attribLocations.render.velocityInput)
+    // }
+    gl.useProgram(programInfo.renderProgram)
+    gl.drawArrays(gl.POINTS, 0, this.particleCount)
+
+    var temp = this.buffers.output
+    this.buffers.output = this.buffers.input
+    this.buffers.input = temp
   }
 }

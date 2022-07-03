@@ -3,3 +3,11 @@ canvas {
   width: 100vw; 
   display: block;
 }
+
+.fps {
+  font-size: medium;
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  text-shadow: 0px 0px 5px black;
+}

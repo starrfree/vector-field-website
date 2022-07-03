@@ -17,4 +17,6 @@ void main() {
   // o_Velocity = vec2(x*x - y*y, x*y);
   o_Velocity = o_Velocity / length(o_Velocity);
   o_Position = i_Position + i_Velocity * 0.001;
+  gl_PointSize = 0.1;
+  gl_Position = vec4(i_Position, 0.0, 1.0);
 }

@@ -11,7 +11,7 @@ import { DeviceDetectorService } from 'ngx-device-detector'
 })
 export class SceneCanvasComponent implements OnInit {
   @ViewChild('glCanvas') private canvas!: ElementRef
-  particleCount: number = 1000000
+  particleCount: number = 1000
   mousePosition: [number, number] = [0.0, 0.0]
   mouseIsActive: boolean = false
   fps: number = 1.0/120
@@ -31,6 +31,7 @@ export class SceneCanvasComponent implements OnInit {
   renderVertexSource = ""
   renderFragmentSource = ""
   buffers!: any
+  textures!: any
 
   constructor(private http: HttpClient, private deviceService: DeviceDetectorService) {}
 
@@ -64,12 +65,18 @@ export class SceneCanvasComponent implements OnInit {
       return
     }
     this.buffers = this.initBuffers(gl)
+    this.textures = this.initTextures(gl, this.canvas.nativeElement.width, this.canvas.nativeElement.height)
     const updateShaderProgram = this.initShaderProgram(gl, this.updateVertexSource, this.updateFragmentSource, ["o_Position", "o_Velocity"])
     const renderShaderProgram = this.initShaderProgram(gl, this.renderVertexSource, this.renderFragmentSource)
 
     const programInfo = {
       updateProgram: updateShaderProgram,
       renderProgram: renderShaderProgram,
+      uniformLocations: {
+        render: {
+          texture: gl.getUniformLocation(renderShaderProgram, 'u_Texture')
+        }
+      },
       attribLocations: {
         update: {
           positionInput: gl.getAttribLocation(updateShaderProgram, 'i_Position'),
@@ -78,8 +85,9 @@ export class SceneCanvasComponent implements OnInit {
           velocityOutput: gl.getAttribLocation(updateShaderProgram, 'o_Velocity')
         },
         render: {
-          position: gl.getAttribLocation(renderShaderProgram, 'i_Position'),
-          velocity: gl.getAttribLocation(renderShaderProgram, 'i_Velocity')
+          // position: gl.getAttribLocation(renderShaderProgram, 'i_Position'),
+          // velocity: gl.getAttribLocation(renderShaderProgram, 'i_Velocity'),
+          vertexPosition: gl.getAttribLocation(renderShaderProgram, 'i_VertexPosition')
         }
       }
     }
@@ -110,7 +118,6 @@ export class SceneCanvasComponent implements OnInit {
         if (this.mouseIsActive) {
           moveMouse(event)
         }
-
       }, false)
     } else {
       this.canvas.nativeElement.addEventListener('mousedown', (event: any) => {
@@ -130,6 +137,7 @@ export class SceneCanvasComponent implements OnInit {
     const resizeCanvas = () => {
       this.canvas.nativeElement.width = this.canvas.nativeElement.clientWidth
       this.canvas.nativeElement.height = this.canvas.nativeElement.clientHeight
+      this.textures = this.initTextures(gl, this.canvas.nativeElement.width, this.canvas.nativeElement.height)
       gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
       this.drawScene(gl, programInfo)
     }
@@ -174,7 +182,7 @@ export class SceneCanvasComponent implements OnInit {
     return shader
   }
 
-  initBuffers(gl: WebGLRenderingContext) {
+  initBuffers(gl: WebGL2RenderingContext) {
     const values: number[] = []
     for (var i = 0; i < this.particleCount; i += 1) {
       const r = () => (Math.random() * 2 - 1)
@@ -193,9 +201,45 @@ export class SceneCanvasComponent implements OnInit {
     gl.bindBuffer(gl.ARRAY_BUFFER, output)
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(values), gl.STREAM_DRAW)
 
+    const positions: number[] = [1.0,  1.0,
+      -1.0,  1.0,
+       1.0, -1.0,
+      -1.0, -1.0]
+    const corners = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, corners)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
+
     return {
       input: input,
       output: output,
+      corners: corners
+    }
+  }
+
+  initTextures(gl: WebGL2RenderingContext, width: number, height: number) {
+    const targetTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, targetTexture);
+
+    const level = 0;
+    const internalFormat = gl.RGBA;
+    const border = 0;
+    const format = gl.RGBA;
+    const type = gl.UNSIGNED_BYTE;
+    const data = null;
+    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                  width, height, border,
+                  format, type, data);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    const fb = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    const attachmentPoint = gl.COLOR_ATTACHMENT0;
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, targetTexture, level);
+    return {
+      texture: targetTexture,
+      frameBuffer: fb
     }
   }
 
@@ -205,7 +249,7 @@ export class SceneCanvasComponent implements OnInit {
     gl.enable(gl.DEPTH_TEST)
     gl.depthFunc(gl.LEQUAL)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-    
+
     { 
       var step = Float32Array.BYTES_PER_ELEMENT
       const numComponents = 2
@@ -241,29 +285,33 @@ export class SceneCanvasComponent implements OnInit {
       gl.enableVertexAttribArray(programInfo.attribLocations.update.velocityInput)
     }
     gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, this.buffers.output)
-    gl.enable(gl.RASTERIZER_DISCARD)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.textures.frameBuffer);
+    // gl.enable(gl.RASTERIZER_DISCARD)
     gl.useProgram(programInfo.updateProgram)
     gl.beginTransformFeedback(gl.POINTS)
     gl.drawArrays(gl.POINTS, 0, this.particleCount)
     gl.endTransformFeedback()
-    gl.disable(gl.RASTERIZER_DISCARD)
+    // gl.disable(gl.RASTERIZER_DISCARD)
 
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+    gl.useProgram(programInfo.renderProgram)
     { 
-      var step = Float32Array.BYTES_PER_ELEMENT
       const numComponents = 2
       const type = gl.FLOAT
       const normalize = false
-      const stride = 4 * step
+      const stride = 0
       const offset = 0
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.input)
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.corners)
       gl.vertexAttribPointer(
-        programInfo.attribLocations.render.positionInput,
+        programInfo.attribLocations.render.vertexPosition,
         numComponents,
         type,
         normalize,
         stride,
         offset)
-      gl.enableVertexAttribArray(programInfo.attribLocations.render.positionInput)
+      gl.enableVertexAttribArray(programInfo.attribLocations.render.vertexPosition)
     }
     // { 
     //   var step = Float32Array.BYTES_PER_ELEMENT
@@ -282,8 +330,10 @@ export class SceneCanvasComponent implements OnInit {
     //     offset)
     //   gl.enableVertexAttribArray(programInfo.attribLocations.render.velocityInput)
     // }
-    gl.useProgram(programInfo.renderProgram)
-    gl.drawArrays(gl.POINTS, 0, this.particleCount)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindTexture(gl.TEXTURE_2D, this.textures.texture);
+    gl.uniform1i(programInfo.uniformLocations.render.texture, 0);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
     var temp = this.buffers.output
     this.buffers.output = this.buffers.input

@@ -1,9 +1,12 @@
 # version 300 es
 precision highp float;
 
-in vec2 i_Position;
+
+uniform sampler2D u_Texture;
+in vec4 i_VertexPosition;
 
 void main() {
-  gl_PointSize = 0.1;
-  gl_Position = vec4(i_Position, 0.0, 1.0);
+  gl_Position = i_VertexPosition;
+  // gl_PointSize = 0.1;
+  // vec4(i_Position, 0.0, 1.0);
 }

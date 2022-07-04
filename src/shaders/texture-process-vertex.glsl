@@ -7,6 +7,4 @@ in vec4 i_VertexPosition;
 
 void main() {
   gl_Position = i_VertexPosition;
-  // gl_PointSize = 0.1;
-  // vec4(i_Position, 0.0, 1.0);
 }

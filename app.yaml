@@ -1,4 +1,4 @@
-service: interference
+service: vectorfield
 runtime: nodejs16
 
 handlers:

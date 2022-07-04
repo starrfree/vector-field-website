@@ -1,0 +1,8 @@
+<div class="container">
+  <div class="field-container">
+    <input type="text" [(ngModel)]="x" (focusout)="xChange.emit(x)">
+  </div>
+  <div class="field-container">
+    <input type="text" [(ngModel)]="y" (focusout)="yChange.emit(y)">
+  </div>
+</div>

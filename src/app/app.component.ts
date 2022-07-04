@@ -6,5 +6,8 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'webgl-test';
+  title = 'Vector Field';
+  
+  x: string = "cos(10.0 * y)"
+  y: string = "sin(20.0 * x)"
 }

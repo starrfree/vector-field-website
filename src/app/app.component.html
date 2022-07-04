@@ -1,4 +1,7 @@
-<app-scene-canvas>
+<div class="container">
+  <app-scene-canvas [x]="x" [y]="y"></app-scene-canvas>
+  <app-toolbar [(x)]="x" [(y)]="y"></app-toolbar>
+</div>
 <script>
   if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
     // Mobile device style: fill the whole browser client area with the game canvas:

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http'
 import { mat4 } from 'gl-matrix'
 import { Observable, fromEvent } from 'rxjs'
 import { DeviceDetectorService } from 'ngx-device-detector'
+import { ShaderService } from '../shader.service'
 
 @Component({
   selector: 'app-scene-canvas',
@@ -10,104 +11,70 @@ import { DeviceDetectorService } from 'ngx-device-detector'
   styleUrls: ['./scene-canvas.component.css']
 })
 export class SceneCanvasComponent implements OnInit {
-  didInit = false
   @ViewChild('glCanvas') private canvas!: ElementRef
-  private _x: string = "x";
-  get x(): string {
-    return this._x;
-  }
-  @Input() set x(value: string) {
-    this._x = value;
-    if (this.didInit) {
+  
+  @Input() parameters: any = {};
+  public initialize = () => {
+    if (this.shaderService.didInit) {
       this.reset = true
-      this.main()
     }
   }
-  private _y: string = "y";
-  get y(): string {
-    return this._y;
-  }
-  @Input() set y(value: string) {
-    this._y = value;
-    if (this.didInit) {
-      this.reset = true
-      this.main()
-    }
-  }
-  particleCount: number = 10000
-  lifetime: number = 10;
-
   mousePosition: [number, number] = [0.0, 0.0]
   mouseIsActive: boolean = false
   public fps: number = 1.0/120
+  step: number = 0
 
   fpsColor = () => {
-    if (this.fps >= 60) {
+    if (this.fps > 30) {
       return "lightgreen"
-    } else if (this.fps >= 30) {
+    } else if (this.fps >= 24) {
       return "orange"
     } else {
       return "lightred"
     }
   }
 
-  updateVertexSource = ""
-  updateFragmentSource = ""
-  renderVertexSource = ""
-  renderFragmentSource = ""
-  processVertexSource = ""
-  processFragmentSource = ""
   buffers!: any
   textures!: any
   textureOffset = 0
   reset: boolean = false
+  didInit = false
 
-  constructor(private http: HttpClient, private deviceService: DeviceDetectorService) {}
+  constructor(private deviceService: DeviceDetectorService, private shaderService: ShaderService) {
+    shaderService.onInit = () => {
+      if (this.didInit) {
+        this.main()
+      }
+    }
+  }
 
   ngOnInit(): void {}
 
   ngAfterViewInit(): void {
-    this.http.get("shaders/particle-update-vertex.glsl", {responseType: 'text'})
-      .subscribe(res => {
-        this.updateVertexSource = res
-        this.http.get("shaders/particle-rendering-vertex.glsl", {responseType: 'text'})
-          .subscribe(res => {
-            this.renderVertexSource = res
-            this.http.get("shaders/particle-rendering-fragment.glsl", {responseType: 'text'})
-            .subscribe(res => {
-              this.renderFragmentSource = res
-              this.http.get("shaders/particle-update-fragment.glsl", {responseType: 'text'})
-                .subscribe(res => {
-                  this.updateFragmentSource = res
-                  this.http.get("shaders/texture-process-fragment.glsl", {responseType: 'text'})
-                    .subscribe(res => {
-                      this.processFragmentSource = res
-                      this.http.get("shaders/texture-process-vertex.glsl", {responseType: 'text'})
-                      .subscribe(res => {
-                        this.processVertexSource = res
-                        this.didInit = true
-                        this.main()
-                      })
-                    })
-                })
-            })
-          })
-      })
+    if (this.shaderService.didInit && !this.didInit) {
+      this.main()
+    }
+    this.didInit = true
   }
 
-  main(): any {
+  main(): void {
     const gl = this.canvas.nativeElement.getContext("webgl2")
     if (gl === null) {
       console.error("Unable to initialize WebGL")
       alert("Unable to initialize WebGL. Your browser or machine may not support it.")
       return
     }
+    this.shaderService.gl = gl;
     this.buffers = this.initBuffers(gl)
     this.textures = this.initTextures(gl, this.canvas.nativeElement.width, this.canvas.nativeElement.height)
-    const updateVertexShaderSource = this.updateVertexSource.replace("$$x$$", this.x).replace("$$y$$", this.y)
-    const updateShaderProgram = this.initShaderProgram(gl, updateVertexShaderSource, this.updateFragmentSource, ["o_Position", "o_Velocity"])
-    const renderShaderProgram = this.initShaderProgram(gl, this.renderVertexSource, this.renderFragmentSource)
-    const processShaderProgram = this.initShaderProgram(gl, this.processVertexSource, this.processFragmentSource)
+    const updateVertexShaderSource = this.shaderService.updateVertexSource.replace("$$x$$", this.parameters.x).replace("$$y$$", this.parameters.y)
+    const updateShaderProgram = this.shaderService.initShaderProgram(gl, updateVertexShaderSource, this.shaderService.updateFragmentSource, ["o_Index", "o_Position", "o_Velocity", "o_Lifetime"])
+    const renderShaderProgram = this.shaderService.initShaderProgram(gl, this.shaderService.renderVertexSource, this.shaderService.renderFragmentSource)
+    const processShaderProgram = this.shaderService.initShaderProgram(gl, this.shaderService.processVertexSource, this.shaderService.processFragmentSource)
+
+    if (!updateShaderProgram) {
+      return
+    }
 
     const programInfo = {
       updateProgram: updateShaderProgram,
@@ -115,7 +82,12 @@ export class SceneCanvasComponent implements OnInit {
       processProgram: processShaderProgram,
       uniformLocations: {
         update: {
-          lifetime: gl.getUniformLocation(updateShaderProgram, 'u_Lifetime')
+          lifetime: gl.getUniformLocation(updateShaderProgram, 'u_Lifetime'),
+          step: gl.getUniformLocation(updateShaderProgram, 'u_Step'),
+          normalize: gl.getUniformLocation(updateShaderProgram, 'u_Normalize'),
+          speed: gl.getUniformLocation(updateShaderProgram, 'u_Speed'),
+          color1: gl.getUniformLocation(updateShaderProgram, 'u_Color1'),
+          color2: gl.getUniformLocation(updateShaderProgram, 'u_Color2')
         },
         render: {
           width: gl.getUniformLocation(renderShaderProgram, 'u_Width'),
@@ -130,6 +102,7 @@ export class SceneCanvasComponent implements OnInit {
       },
       attribLocations: {
         update: {
+          indexInput: gl.getAttribLocation(updateShaderProgram, 'i_Index'),
           positionInput: gl.getAttribLocation(updateShaderProgram, 'i_Position'),
           velocityInput: gl.getAttribLocation(updateShaderProgram, 'i_Velocity'),
           lifetimeInput: gl.getAttribLocation(updateShaderProgram, 'i_Lifetime'),
@@ -149,19 +122,30 @@ export class SceneCanvasComponent implements OnInit {
     }
 
     var start = new Date().getTime();
-    var it = 0;
+    this.step = 0
     var render = (time: number) => {
-      this.drawScene(gl, programInfo);
+      var iterations = 1;
+      if (this.parameters.speed > 2) {
+        iterations = 2;
+      } else if (this.parameters.speed > 4) {
+        iterations = 3;
+      } else if (this.parameters.speed > 6) {
+        iterations = 5;
+      } else if (this.parameters.speed > 8) {
+        iterations = 6;
+      }
+      this.drawScene(gl, programInfo, iterations);
       if (!this.reset) {
         requestAnimationFrame(render);
       } else {
         this.reset = false
+        this.main()
       }
-      if (it % 100 == 0) {
+      if (this.step % 100 == 0 && this.step != 0) {
         this.fps = 1000.0 / (new Date().getTime() - start) * 100;
         start = new Date().getTime();
       }
-      it++;
+      this.step++;
     }
     requestAnimationFrame(render)
 
@@ -209,47 +193,13 @@ export class SceneCanvasComponent implements OnInit {
     resizeCanvas()
   }
 
-  private initShaderProgram(gl: any, vsSource: string, fsSource: string, transform_feedback_varyings: string[] | null = null): any {
-    const vertexShader = this.loadShader(gl, gl.VERTEX_SHADER, vsSource)
-    const fragmentShader = this.loadShader(gl, gl.FRAGMENT_SHADER, fsSource)
-
-    const shaderProgram = gl.createProgram()
-    gl.attachShader(shaderProgram, vertexShader)
-    gl.attachShader(shaderProgram, fragmentShader)
-    if (transform_feedback_varyings != null) {
-      gl.transformFeedbackVaryings(
-        shaderProgram,
-        transform_feedback_varyings,
-        gl.INTERLEAVED_ATTRIBS)
-    }  
-    gl.linkProgram(shaderProgram) 
-
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-      console.error("Unable to initialize the shader program: " + gl.getProgramInfoLog(shaderProgram))
-      // alert("Unable to initialize the shader program: " + gl.getProgramInfoLog(shaderProgram))
-      return null
-    }
-
-    return shaderProgram
-  }
-
-  private loadShader(gl: any, type: any, source: string): any {
-    const shader = gl.createShader(type)
-    gl.shaderSource(shader, source)
-    gl.compileShader(shader)
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      console.error("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader))
-      // alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader))
-      gl.deleteShader(shader)
-      return null
-    }
-    return shader
-  }
-
   initBuffers(gl: WebGL2RenderingContext) {
     const values: number[] = []
-    for (var i = 0; i < this.particleCount; i += 1) {
+    for (var i = 0; i < this.parameters.particleCount; i += 1) {
       const r = () => (Math.random() * 2 - 1)
+      
+      // INDEX
+      values.push(i)
 
       // POSITION
       values.push(r())
@@ -260,7 +210,7 @@ export class SceneCanvasComponent implements OnInit {
       values.push(r() * 3)
 
       // LIFETIME
-      values.push(r() * this.lifetime)
+      values.push(r() * this.parameters.lifetime)
     }
 
     const input = gl.createBuffer()
@@ -321,130 +271,98 @@ export class SceneCanvasComponent implements OnInit {
     }
   }
 
-  drawScene(gl: any, programInfo: any) {
-    gl.clearColor(0.0, 0.0, 0.0, 1.0)
-    gl.clearDepth(1.0)
-    gl.enable(gl.DEPTH_TEST)
-    gl.depthFunc(gl.LEQUAL)
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+  drawScene(gl: WebGL2RenderingContext, programInfo: any, iterations: number = 1) {
+    for (let i = 0; i < iterations; i++) {
+      gl.clearColor(0.0, 0.0, 0.0, 1.0)
+      gl.clearDepth(1.0)
+      gl.enable(gl.DEPTH_TEST)
+      gl.depthFunc(gl.LEQUAL)
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    gl.useProgram(programInfo.updateProgram)
-    gl.uniform1f(programInfo.uniformLocations.update.lifetime, this.lifetime)
-    { 
-      var step = Float32Array.BYTES_PER_ELEMENT
-      const numComponents = 2
-      const type = gl.FLOAT
-      const normalize = false
-      const stride = 4 * step
-      const offset = 0
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.input)
-      gl.vertexAttribPointer(
-        programInfo.attribLocations.update.positionInput,
-        numComponents,
-        type,
-        normalize,
-        stride,
-        offset)
-      gl.enableVertexAttribArray(programInfo.attribLocations.update.positionInput)
-    }
-    { 
-      var step = Float32Array.BYTES_PER_ELEMENT
-      const numComponents = 2
-      const type = gl.FLOAT
-      const normalize = false
-      const stride = 4 * step
-      const offset = 2 * step
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.input)
-      gl.vertexAttribPointer(
-        programInfo.attribLocations.update.velocityInput,
-        numComponents,
-        type,
-        normalize,
-        stride,
-        offset)
-      gl.enableVertexAttribArray(programInfo.attribLocations.update.velocityInput)
-    }
-    // { 
-    //   var step = Float32Array.BYTES_PER_ELEMENT
-    //   const numComponents = 1
-    //   const type = gl.FLOAT
-    //   const normalize = false
-    //   const stride = 5 * step
-    //   const offset = 4 * step
-    //   gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.input)
-    //   gl.vertexAttribPointer(
-    //     programInfo.attribLocations.update.lifetimeInput,
-    //     numComponents,
-    //     type,
-    //     normalize,
-    //     stride,
-    //     offset)
-    //   gl.enableVertexAttribArray(programInfo.attribLocations.update.lifetimeInput)
-    // }
-    gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, this.buffers.output)
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.textures.frameBuffers[(this.textureOffset) % 2]);
-    // gl.enable(gl.RASTERIZER_DISCARD)
-    gl.beginTransformFeedback(gl.POINTS)
-    gl.drawArrays(gl.POINTS, 0, this.particleCount)
-    gl.endTransformFeedback()
-    // gl.disable(gl.RASTERIZER_DISCARD)
+      gl.useProgram(programInfo.updateProgram)
+      gl.uniform1f(programInfo.uniformLocations.update.lifetime, this.parameters.lifetime)
+      gl.uniform1i(programInfo.uniformLocations.update.step, this.step)
+      gl.uniform1i(programInfo.uniformLocations.update.normalize, this.parameters.normalize)
+      gl.uniform1f(programInfo.uniformLocations.update.speed, this.parameters.speed / iterations)
+      gl.uniform4f(programInfo.uniformLocations.update.color1, this.parameters.color1[0], this.parameters.color1[1], this.parameters.color1[2], this.parameters.color1[3])
+      gl.uniform4f(programInfo.uniformLocations.update.color2, this.parameters.color2[0], this.parameters.color2[1], this.parameters.color2[2], this.parameters.color2[3])
+      {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.input);
+        var step = Float32Array.BYTES_PER_ELEMENT;
+        var total = 1 + 2 + 2 + 1;
+        var stride = step * total;
+        gl.vertexAttribPointer(programInfo.attribLocations.update.indexInput, 1, gl.FLOAT, false, stride, 0);
+        gl.vertexAttribPointer(programInfo.attribLocations.update.positionInput, 2, gl.FLOAT, false, stride, step * 1);
+        gl.vertexAttribPointer(programInfo.attribLocations.update.velocityInput, 2, gl.FLOAT, false, stride, step * 3);
+        gl.vertexAttribPointer(programInfo.attribLocations.update.lifetimeInput, 1, gl.FLOAT, false, stride, step * 5);
+        gl.enableVertexAttribArray(programInfo.attribLocations.update.indexInput);
+        gl.enableVertexAttribArray(programInfo.attribLocations.update.positionInput);
+        gl.enableVertexAttribArray(programInfo.attribLocations.update.velocityInput);
+        gl.enableVertexAttribArray(programInfo.attribLocations.update.lifetimeInput);
+      }
+      gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, this.buffers.output)
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.textures.frameBuffers[(this.textureOffset) % 2]);
+      gl.beginTransformFeedback(gl.POINTS)
+      gl.drawArrays(gl.POINTS, 0, this.parameters.particleCount)
+      gl.endTransformFeedback()
 
-    gl.useProgram(programInfo.processProgram)
-    { 
-      const numComponents = 2
-      const type = gl.FLOAT
-      const normalize = false
-      const stride = 0
-      const offset = 0
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.corners)
-      gl.vertexAttribPointer(
-        programInfo.attribLocations.process.vertexPosition,
-        numComponents,
-        type,
-        normalize,
-        stride,
-        offset)
-      gl.enableVertexAttribArray(programInfo.attribLocations.process.vertexPosition)
-    }
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.textures.frameBuffers[(this.textureOffset + 1) % 2]);
-    gl.bindTexture(gl.TEXTURE_2D, this.textures.textures[(this.textureOffset) % 2]);
-    gl.uniform1f(programInfo.uniformLocations.process.width, gl.canvas.width)
-    gl.uniform1f(programInfo.uniformLocations.process.height, gl.canvas.height)
-    gl.uniform1i(programInfo.uniformLocations.process.texture, 0);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-    
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+      gl.useProgram(programInfo.processProgram)
+      { 
+        const numComponents = 2
+        const type = gl.FLOAT
+        const normalize = false
+        const stride = 0
+        const offset = 0
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.corners)
+        gl.vertexAttribPointer(
+          programInfo.attribLocations.process.vertexPosition,
+          numComponents,
+          type,
+          normalize,
+          stride,
+          offset)
+        gl.enableVertexAttribArray(programInfo.attribLocations.process.vertexPosition)
+      }
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.textures.frameBuffers[(this.textureOffset + 1) % 2]);
+      gl.bindTexture(gl.TEXTURE_2D, this.textures.textures[(this.textureOffset) % 2]);
+      gl.uniform1f(programInfo.uniformLocations.process.width, gl.canvas.width)
+      gl.uniform1f(programInfo.uniformLocations.process.height, gl.canvas.height)
+      gl.uniform1i(programInfo.uniformLocations.process.texture, 0);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+      
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
-    gl.useProgram(programInfo.renderProgram)
-    { 
-      const numComponents = 2
-      const type = gl.FLOAT
-      const normalize = false
-      const stride = 0
-      const offset = 0
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.corners)
-      gl.vertexAttribPointer(
-        programInfo.attribLocations.render.vertexPosition,
-        numComponents,
-        type,
-        normalize,
-        stride,
-        offset)
-      gl.enableVertexAttribArray(programInfo.attribLocations.render.vertexPosition)
-    }
-    gl.bindTexture(gl.TEXTURE_2D, this.textures.textures[(this.textureOffset + 1) % 2]);
-    gl.uniform1f(programInfo.uniformLocations.render.width, gl.canvas.width)
-    gl.uniform1f(programInfo.uniformLocations.render.height, gl.canvas.height)
-    gl.uniform1i(programInfo.uniformLocations.render.texture, 0);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+      gl.useProgram(programInfo.renderProgram)
+      { 
+        const numComponents = 2
+        const type = gl.FLOAT
+        const normalize = false
+        const stride = 0
+        const offset = 0
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.corners)
+        gl.vertexAttribPointer(
+          programInfo.attribLocations.render.vertexPosition,
+          numComponents,
+          type,
+          normalize,
+          stride,
+          offset)
+        gl.enableVertexAttribArray(programInfo.attribLocations.render.vertexPosition)
+      }
+      gl.bindTexture(gl.TEXTURE_2D, this.textures.textures[(this.textureOffset + 1) % 2]);
+      gl.uniform1f(programInfo.uniformLocations.render.width, gl.canvas.width)
+      gl.uniform1f(programInfo.uniformLocations.render.height, gl.canvas.height)
+      gl.uniform1i(programInfo.uniformLocations.render.texture, 0);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
-    gl.bindTexture(gl.TEXTURE_2D, null);
+      gl.bindTexture(gl.TEXTURE_2D, null);
 
-    {
-      var temp = this.buffers.output
-      this.buffers.output = this.buffers.input
-      this.buffers.input = temp
+      {
+        var temp = this.buffers.output
+        this.buffers.output = this.buffers.input
+        this.buffers.input = temp
+      }
+      this.textureOffset += 1
     }
-    this.textureOffset += 1
   }
 }

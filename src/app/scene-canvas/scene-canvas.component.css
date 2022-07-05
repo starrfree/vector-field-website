@@ -3,7 +3,7 @@
   right: 0;
   text-align: right;
   background-color: black;
-  width: 75%;
+  width: calc(100% - 270px);
 }
 
 canvas {
@@ -13,6 +13,7 @@ canvas {
 
 .fps {
   font-size: medium;
+  font-weight: 400;
   position: absolute;
   right: 10px;
   bottom: 10px;

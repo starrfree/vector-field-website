@@ -1,8 +1,38 @@
 .container {
-  width: 25%;
+  width: 270px;
 }
 
 .field-container {
   padding-top: 10px;
   padding-left: 10px;
+}
+
+.slider-label {
+  margin-left: .6em;
+  position: relative;
+  top: -4px;
+}
+
+.before-field {
+  margin-right: .6em;
+}
+
+.text-field {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+}
+
+.checkbox-label {
+  margin-left: .6em;
+  position: relative;
+  top: -1px;
+}
+
+.error {
+  color: rgb(255, 98, 80);
+  font-weight: 400;
+}
+
+.after-textfield {
+  margin-left: .6em;
 }

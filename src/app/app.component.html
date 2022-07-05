@@ -1,6 +1,6 @@
 <div class="container">
-  <app-scene-canvas [x]="x" [y]="y"></app-scene-canvas>
-  <app-toolbar [(x)]="x" [(y)]="y"></app-toolbar>
+  <app-scene-canvas [parameters]="parameters"></app-scene-canvas>
+  <app-toolbar [parameters]="parameters" [x]="parameters.x" [y]="parameters.y" (parametersChange)="initialize($event)"></app-toolbar>
 </div>
 <script>
   if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {

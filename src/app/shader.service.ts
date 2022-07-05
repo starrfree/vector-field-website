@@ -1,0 +1,104 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ShaderService {
+  updateVertexSource = ""
+  updateFragmentSource = ""
+  renderVertexSource = ""
+  renderFragmentSource = ""
+  processVertexSource = ""
+  processFragmentSource = ""
+  didInit = false
+
+  onInit = () => {}
+  gl!: WebGL2RenderingContext
+
+  constructor(private http: HttpClient) { 
+    this.http.get("shaders/particle-update-vertex.glsl", {responseType: 'text'})
+      .subscribe(res => {
+        this.updateVertexSource = res
+        this.http.get("shaders/particle-rendering-vertex.glsl", {responseType: 'text'})
+          .subscribe(res => {
+            this.renderVertexSource = res
+            this.http.get("shaders/particle-rendering-fragment.glsl", {responseType: 'text'})
+            .subscribe(res => {
+              this.renderFragmentSource = res
+              this.http.get("shaders/particle-update-fragment.glsl", {responseType: 'text'})
+                .subscribe(res => {
+                  this.updateFragmentSource = res
+                  this.http.get("shaders/texture-process-fragment.glsl", {responseType: 'text'})
+                    .subscribe(res => {
+                      this.processFragmentSource = res
+                      this.http.get("shaders/texture-process-vertex.glsl", {responseType: 'text'})
+                      .subscribe(res => {
+                        this.processVertexSource = res
+                        this.didInit = true
+                        this.onInit()
+                      })
+                    })
+                })
+            })
+          })
+      })
+  }
+
+
+
+  public initShaderProgram(gl: any, vsSource: string, fsSource: string, transform_feedback_varyings: string[] | null = null): any {
+    const vertexShader = this.loadShader(gl, gl.VERTEX_SHADER, vsSource)
+    const fragmentShader = this.loadShader(gl, gl.FRAGMENT_SHADER, fsSource)
+    if (!vertexShader || !fragmentShader) {
+      return null
+    }
+
+    const shaderProgram = gl.createProgram()
+    gl.attachShader(shaderProgram, vertexShader)
+    gl.attachShader(shaderProgram, fragmentShader)
+    if (transform_feedback_varyings != null) {
+      gl.transformFeedbackVaryings(
+        shaderProgram,
+        transform_feedback_varyings,
+        gl.INTERLEAVED_ATTRIBS)
+    }  
+    gl.linkProgram(shaderProgram) 
+
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+      console.error("Unable to initialize the shader program: " + gl.getProgramInfoLog(shaderProgram))
+      // alert("Unable to initialize the shader program: " + gl.getProgramInfoLog(shaderProgram))
+      return null
+    }
+
+    return shaderProgram
+  }
+
+  public loadShader(gl: any, type: any, source: string): any {
+    const shader = gl.createShader(type)
+    gl.shaderSource(shader, source)
+    gl.compileShader(shader)
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader))
+      // alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader))
+      gl.deleteShader(shader)
+      return null
+    }
+    return shader
+  }
+
+  public checkUpdateShader(x: string, y: string): boolean {
+    const updateVertexShaderSource = this.updateVertexSource.replace("$$x$$", x).replace("$$y$$", y)
+    const shader = this.gl.createShader(this.gl.VERTEX_SHADER)
+    if (!shader) {
+      return false
+    }
+    this.gl.shaderSource(shader, updateVertexShaderSource)
+    this.gl.compileShader(shader)
+    if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+      this.gl.deleteShader(shader)
+      return false
+    }
+    return true
+  }
+}

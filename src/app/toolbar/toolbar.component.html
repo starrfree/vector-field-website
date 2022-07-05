@@ -1,8 +1,30 @@
 <div class="container">
   <div class="field-container">
-    <input type="text" [(ngModel)]="x" (focusout)="xChange.emit(x)">
+    <span class="before-field">dx</span>
+    <input type="text" class="text-field" [(ngModel)]="x" (input)="checkXY()" (focusout)="submitXY()" (keydown.enter)="blur()">
+    <span *ngIf="error.x" class="error after-textfield">err</span>
   </div>
   <div class="field-container">
-    <input type="text" [(ngModel)]="y" (focusout)="yChange.emit(y)">
+    <span class="before-field">dy</span>
+    <input type="text" class="text-field" [(ngModel)]="y" (input)="checkXY()" (focusout)="submitXY()" (keydown.enter)="blur()">
+    <span *ngIf="error.y" class="error after-textfield">err</span>
+  </div>
+  <div class="field-container">
+    <input #particleCount type="range" min="100" max="100000" [ngModel]="parameters.particleCount"
+     (ngModelChange)="parameters.particleCount = $event;parametersChange.emit(parameters)" (keydown.enter)="blur()">
+    <label for="particleCount" class="slider-label">Particles</label>
+  </div>
+  <div class="field-container">
+    <input #speed type="range" min="0.01" max="10" step="0.01" [(ngModel)]="parameters.speed" (keydown.enter)="blur()">
+    <label for="speed" class="slider-label">Speed</label>
+  </div>
+  <div class="field-container">
+    <input #lifetime type="range" min="0.1" max="100" [ngModel]="parameters.lifetime"
+    (ngModelChange)="parameters.lifetime = $event;parametersChange.emit(parameters)" (keydown.enter)="blur()">
+    <label for="lifetime" class="slider-label">Lifetime</label>
+  </div>
+  <div class="field-container">
+    <input #normalize type="checkbox" [(ngModel)]="parameters.normalize" (keydown.enter)="blur()">
+    <label for="normalize" class="checkbox-label">Normalize</label>
   </div>
 </div>

@@ -1,0 +1,37 @@
+.slider-container {
+  position: relative;
+  height: 100px;
+  width: 50px;
+  margin-top: -10px;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+.indicator {
+  position: absolute;
+  left: 22px;
+  z-index: 10;
+  transform: translate(0, -50%); 
+  padding: 2px 4px 3px 8px;
+  border-radius: 100% 5px 5px 100%;
+}
+
+.vertical-center {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+.placeholder {
+  margin: 1px 2px 0 2px;
+}

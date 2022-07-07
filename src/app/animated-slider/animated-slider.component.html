@@ -1,0 +1,12 @@
+<div #wrapper class="slider-container">
+  <svg width="100%" height="100%" class="vertical-center">
+    <rect *ngFor="let item of [].constructor(ticks + 1); let i = index"
+     attr.fill="{{barColor(i)}}" width="100%" height="1px" attr.width="{{barWidth(i)}}" attr.y="calc({{i * 100 / ticks}}% - 0.5px)"></rect>
+    <rect attr.fill="{{color}}" width="100%" height="2px" width="18px" x="0" attr.y="calc({{100 - (default + min) / (max - min) * 100}}% - 0.5px)"></rect>
+    <rect attr.fill="{{color}}" width="100%" height="2px" width="18px" x="0" attr.y="calc({{100 - (value + min) / (max - min) * 100}}% - 0.5px)"></rect>
+  </svg>
+  <span style.top="{{100 - (value + min) / (max - min) * 100}}%" [style.background-color]="color" class="noselect indicator">
+    <span *ngIf="isDragged">{{value | number : value >= 10 ? '1.0-0' : (value >= 0.1 ? '1.1-1' : '1.1-2')}}</span>
+    <span *ngIf="!isDragged" class="placeholder"></span>
+  </span>
+</div>

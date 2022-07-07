@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core'
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { mat4 } from 'gl-matrix'
 import { Observable, fromEvent } from 'rxjs'
@@ -14,15 +14,18 @@ export class SceneCanvasComponent implements OnInit {
   @ViewChild('glCanvas') private canvas!: ElementRef
   
   @Input() parameters: any = {};
+  @Output() parametersChange = new EventEmitter<any>();
   public initialize = () => {
     if (this.shaderService.didInit) {
       this.reset = true
     }
   }
+  dt: number = 1.0/60
   mousePosition: [number, number] = [0.0, 0.0]
   mouseIsActive: boolean = false
   public fps: number = 1.0/120
   step: number = 0
+  size: number = 1
 
   fpsColor = () => {
     if (this.fps > 30) {
@@ -59,6 +62,7 @@ export class SceneCanvasComponent implements OnInit {
 
   main(): void {
     const gl = this.canvas.nativeElement.getContext("webgl2")
+    // gl.getExtension("EXT_color_buffer_float")
     if (gl === null) {
       console.error("Unable to initialize WebGL")
       alert("Unable to initialize WebGL. Your browser or machine may not support it.")
@@ -82,12 +86,17 @@ export class SceneCanvasComponent implements OnInit {
       processProgram: processShaderProgram,
       uniformLocations: {
         update: {
+          t: gl.getUniformLocation(updateShaderProgram, 't'),
+          dt: gl.getUniformLocation(updateShaderProgram, 'dt'),
+          xRange: gl.getUniformLocation(updateShaderProgram, 'u_xRange'),
+          yRange: gl.getUniformLocation(updateShaderProgram, 'u_yRange'),
           lifetime: gl.getUniformLocation(updateShaderProgram, 'u_Lifetime'),
           step: gl.getUniformLocation(updateShaderProgram, 'u_Step'),
           normalize: gl.getUniformLocation(updateShaderProgram, 'u_Normalize'),
           speed: gl.getUniformLocation(updateShaderProgram, 'u_Speed'),
           color1: gl.getUniformLocation(updateShaderProgram, 'u_Color1'),
-          color2: gl.getUniformLocation(updateShaderProgram, 'u_Color2')
+          color2: gl.getUniformLocation(updateShaderProgram, 'u_Color2'),
+          size: gl.getUniformLocation(updateShaderProgram, 'u_Size')
         },
         render: {
           width: gl.getUniformLocation(renderShaderProgram, 'u_Width'),
@@ -111,8 +120,6 @@ export class SceneCanvasComponent implements OnInit {
           lifetimeOutput: gl.getAttribLocation(updateShaderProgram, 'o_Lifetime'),
         },
         render: {
-          // position: gl.getAttribLocation(renderShaderProgram, 'i_Position'),
-          // velocity: gl.getAttribLocation(renderShaderProgram, 'i_Velocity'),
           vertexPosition: gl.getAttribLocation(renderShaderProgram, 'i_VertexPosition')
         },
         process: {
@@ -121,8 +128,15 @@ export class SceneCanvasComponent implements OnInit {
       }
     }
 
-    var start = new Date().getTime();
+    // var start = new Date().getTime();
+    var startFPS = new Date().getTime();
+    var startDt = new Date().getTime();
     this.step = 0
+    this.size = 1
+    if (this.parameters.particleCount > 10000) {
+      this.size = 3.16227766017 / Math.pow(this.parameters.particleCount, 1.0/6.0)
+    }
+    this.parameters.t = 0
     var render = (time: number) => {
       var iterations = 1;
       if (this.parameters.speed > 2) {
@@ -142,13 +156,20 @@ export class SceneCanvasComponent implements OnInit {
         this.main()
       }
       if (this.step % 100 == 0 && this.step != 0) {
-        this.fps = 1000.0 / (new Date().getTime() - start) * 100;
-        start = new Date().getTime();
+        this.fps = 1000.0 / (new Date().getTime() - startFPS) * 100;
+        startFPS = new Date().getTime();
       }
-      this.step++;
+      this.step++
+      this.dt = .01 / (new Date().getTime() - startDt);
+      startDt = new Date().getTime()
+      this.parameters.t += this.dt * 10.
+      if (this.parameters.t > this.parameters.maxT) {
+        this.parameters.t = this.parameters.minT
+      }
+      this.parametersChange.emit(this.parameters)
     }
     requestAnimationFrame(render)
-
+    /*
     const moveMouse = (event: any) => {
       this.mousePosition = [event.pageX - 5, this.canvas.nativeElement.height - event.pageY + 5]
       // this.drawScene(gl, programInfo)
@@ -181,6 +202,7 @@ export class SceneCanvasComponent implements OnInit {
         }
       }, false)
     }
+    */
 
     const resizeCanvas = () => {
       this.canvas.nativeElement.width = 3 * this.canvas.nativeElement.clientWidth
@@ -253,8 +275,8 @@ export class SceneCanvasComponent implements OnInit {
       gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
                     width, height, border,
                     format, type, data);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
@@ -280,12 +302,17 @@ export class SceneCanvasComponent implements OnInit {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
       gl.useProgram(programInfo.updateProgram)
+      gl.uniform1f(programInfo.uniformLocations.update.t, this.parameters.t)
+      gl.uniform1f(programInfo.uniformLocations.update.dt, this.dt)
+      gl.uniform2f(programInfo.uniformLocations.update.xRange, this.parameters.xRange[0], this.parameters.xRange[1])
+      gl.uniform2f(programInfo.uniformLocations.update.yRange, this.parameters.yRange[0], this.parameters.yRange[1])
       gl.uniform1f(programInfo.uniformLocations.update.lifetime, this.parameters.lifetime)
       gl.uniform1i(programInfo.uniformLocations.update.step, this.step)
       gl.uniform1i(programInfo.uniformLocations.update.normalize, this.parameters.normalize)
       gl.uniform1f(programInfo.uniformLocations.update.speed, this.parameters.speed / iterations)
       gl.uniform4f(programInfo.uniformLocations.update.color1, this.parameters.color1[0], this.parameters.color1[1], this.parameters.color1[2], this.parameters.color1[3])
       gl.uniform4f(programInfo.uniformLocations.update.color2, this.parameters.color2[0], this.parameters.color2[1], this.parameters.color2[2], this.parameters.color2[3])
+      gl.uniform1f(programInfo.uniformLocations.update.size, this.size)
       {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.input);
         var step = Float32Array.BYTES_PER_ELEMENT;

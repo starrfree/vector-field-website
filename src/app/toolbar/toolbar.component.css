@@ -4,7 +4,11 @@
 
 .field-container {
   padding-top: 10px;
-  padding-left: 10px;
+  padding-left: 15px;
+}
+
+.field-group {
+  margin-bottom: 20px;
 }
 
 .slider-label {
@@ -20,10 +24,22 @@
 .text-field {
   font-family: 'Lato', sans-serif;
   font-weight: 400;
+  background-color: rgb(76, 76, 76);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 3px;
+  width: 190px;
 }
 
-.checkbox-label {
+.after-label {
   margin-left: .6em;
+  position: relative;
+  top: -1px;
+}
+
+.before-label {
+  margin-right: .6em;
   position: relative;
   top: -1px;
 }
@@ -35,4 +51,117 @@
 
 .after-textfield {
   margin-left: .6em;
+}
+
+.textblack {
+  color: black;
+}
+
+.inline {
+  display: inline-block;
+}
+
+.slider-container {
+  margin-right: 20px;
+  margin-top: 10px;
+}
+
+.color-picker {
+  display: inline-block;
+}
+
+.small-field {
+  width: 20px;
+}
+
+.small-slider {
+  width: 123px;
+}
+
+.app-slider-label {
+  margin-top: 9px;
+  /* font-size: 14px; */
+}
+
+.app-slider {
+  font-size: 11px;
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  background-color: rgb(76, 76, 76);
+  /* transform: translate(0, 2px); */
+  border-radius: 10px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+ background-color: lightblue;/*#3273F6;*/
+ width: 13px;
+ height: 13px;
+ border-radius: 100px;
+}
+
+/* input[type="color"] {
+	-webkit-appearance: none;
+  background-color: rgb(76, 76, 76);
+	border: none;
+	width: 40px;
+	height: 25px;
+  border-radius: 5px;
+  transform: translate(0, 32%);
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  border: none;
+	padding: 0;
+  border-radius: 5px;
+}
+
+input[type="color"]::-webkit-color-swatch {
+	border: none;
+  border-radius: 5px;
+} */
+
+input[type='color'] {
+  padding: 0;
+  width: 150%;
+  height: 150%;
+  margin: -25%;
+}
+
+.cp_wrapper {
+  overflow: hidden;
+  width: 2em;
+  height: 2em;
+  /* optional formatting below here */
+  border-radius: 50%;
+  box-shadow: 1px 1px 3px 0px gray;
+  display: inherit;
+  transform: translate(0, 30%);
+  margin-left: 5px;
+}
+
+.divider {
+  height: 0.5px;
+  border-radius: 100px;
+  background-color: rgb(176, 176, 176);
+  display: inline-flex;
+  transform: translate(0, -5px);
+}
+
+.range-divider {
+  width: 128px;
+}
+
+#tlabel {
+  padding-right: 2px;
+}
+
+.checkbox-field {
+  margin-left: -6px;
+}
+
+.after-picker {
+  margin-left: 30px;
 }

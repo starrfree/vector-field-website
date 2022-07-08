@@ -219,9 +219,13 @@ input[type="checkbox"]:checked::before {
 }
 
 .title {
+  padding: 20px 0 10px 20px;
+}
+
+.title-a {
   font-size: 27px;
   font-weight: 700;
-  padding: 20px 0 10px 20px;
-  color:rgb(220, 220, 220)
+  color:rgb(220, 220, 220);
+  text-decoration: none;
 }
 

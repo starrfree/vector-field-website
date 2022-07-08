@@ -46,18 +46,15 @@ export class SceneCanvasComponent implements OnInit {
   didInit = false
 
   constructor(private deviceService: DeviceDetectorService,
-     private shaderService: ShaderService,
-     private location: Location, private router: Router, private activatedRoute: ActivatedRoute) {
-    shaderService.onInit = () => {
+     private shaderService: ShaderService) {
+    shaderService.onInit.subscribe((val) => {
       if (this.didInit) {
         this.main()
       }
-    }
+    })
   }
 
   ngOnInit(): void {
-    const url = this.router.createUrlTree([], {relativeTo: this.activatedRoute, queryParams: this.parameters}).toString()
-    this.location.go(url);
   }
 
   ngAfterViewInit(): void {

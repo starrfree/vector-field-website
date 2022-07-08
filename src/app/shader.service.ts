@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,36 +14,38 @@ export class ShaderService {
   processFragmentSource = ""
   didInit = false
 
-  onInit = () => {}
+  onInit: Observable<any>
   gl!: WebGL2RenderingContext
 
   constructor(private http: HttpClient) { 
-    this.http.get("shaders/particle-update-vertex.glsl", {responseType: 'text'})
-      .subscribe(res => {
-        this.updateVertexSource = res
-        this.http.get("shaders/particle-rendering-vertex.glsl", {responseType: 'text'})
-          .subscribe(res => {
-            this.renderVertexSource = res
-            this.http.get("shaders/particle-rendering-fragment.glsl", {responseType: 'text'})
+    this.onInit =  new Observable((observer) => {
+      this.http.get("shaders/particle-update-vertex.glsl", {responseType: 'text'})
+        .subscribe(res => {
+          this.updateVertexSource = res
+          this.http.get("shaders/particle-rendering-vertex.glsl", {responseType: 'text'})
             .subscribe(res => {
-              this.renderFragmentSource = res
-              this.http.get("shaders/particle-update-fragment.glsl", {responseType: 'text'})
-                .subscribe(res => {
-                  this.updateFragmentSource = res
-                  this.http.get("shaders/texture-process-fragment.glsl", {responseType: 'text'})
-                    .subscribe(res => {
-                      this.processFragmentSource = res
-                      this.http.get("shaders/texture-process-vertex.glsl", {responseType: 'text'})
+              this.renderVertexSource = res
+              this.http.get("shaders/particle-rendering-fragment.glsl", {responseType: 'text'})
+              .subscribe(res => {
+                this.renderFragmentSource = res
+                this.http.get("shaders/particle-update-fragment.glsl", {responseType: 'text'})
+                  .subscribe(res => {
+                    this.updateFragmentSource = res
+                    this.http.get("shaders/texture-process-fragment.glsl", {responseType: 'text'})
                       .subscribe(res => {
-                        this.processVertexSource = res
-                        this.didInit = true
-                        this.onInit()
+                        this.processFragmentSource = res
+                        this.http.get("shaders/texture-process-vertex.glsl", {responseType: 'text'})
+                        .subscribe(res => {
+                          this.processVertexSource = res
+                          this.didInit = true
+                          observer.next(true)
+                        })
                       })
-                    })
-                })
+                  })
+              })
             })
-          })
-      })
+        })
+    })
   }
 
 

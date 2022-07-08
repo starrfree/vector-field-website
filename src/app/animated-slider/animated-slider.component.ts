@@ -80,14 +80,18 @@ export class AnimatedSliderComponent implements OnInit {
 
   @HostListener('window:mouseup')
   public onMouseUp(): void {
+    if (this.isDragged) {
+      this.onUp.emit()
+    }
     this.isDragged = false;
-    this.onUp.emit()
   }
 
   @HostListener('window:touchend')
   public onTouchUp(): void {
+    if (this.isDragged) {
+      this.onUp.emit()
+    }
     this.isDragged = false;
-    this.onUp.emit()
   }
 
   // prevent the dragstart event

@@ -5,21 +5,26 @@
   <div class="field-group">
     <div class="field-container">
       <span class="before-field">dx</span>
-      <input type="text" class="text-field" [(ngModel)]="x" (input)="checkXY()" (focusout)="submitXY(); changeURL()" (keydown.enter)="blur()">
-      <span *ngIf="error.x" class="error after-textfield">err</span>
+      <input type="text" class="text-field" [(ngModel)]="x" (input)="checkXY()" (focusout)="submitXY()" (keydown.enter)="blur()">
+      <div class="error-container">
+        <span *ngIf="error.x" class="error after-textfield">err</span>
+      </div>
     </div>
     <div class="field-container">
       <span class="before-field">dy</span>
-      <input type="text" class="text-field" [(ngModel)]="y" (input)="checkXY()" (focusout)="submitXY(); changeURL()" (keydown.enter)="blur()">
-      <span *ngIf="error.y" class="error after-textfield">err</span>
+      <input type="text" class="text-field" [(ngModel)]="y" (input)="checkXY()" (focusout)="submitXY()" (keydown.enter)="blur()">
+      <div class="error-container">
+        <span *ngIf="error.y" class="error after-textfield">err</span>
+      </div>
     </div>
   </div>
+  <div class="divider field-divider"></div>
   <div class="field-group">
     <div class="field-container">
       <span id="tlabel" class="before-label">t</span>
       <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.minT" (focusout)="setMinT(); changeURL()" (keydown.enter)="blur()">
       <input type="range" class="small-slider dark-background-slider" [attr.min]="parameters.minT" [attr.max]="parameters.maxT" step="0.01"
-       [ngModel]="parameters.t" (ngModelChange)="parameters.t = $event; changeURL()" (keydown.enter)="blur()">
+       [(ngModel)]="parameters.t" (keydown.enter)="blur()">
       <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.maxT" (focusout)="setMaxT(); changeURL()" (keydown.enter)="blur()">
     </div>
     <div class="field-container">
@@ -35,6 +40,7 @@
       <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.yRange[1]" (focusout)="setMaxY(); changeURL()" (keydown.enter)="blur()">
     </div>
   </div>
+  <div class="divider field-divider"></div>
   <div class="field-group">
     <div class="field-container inline slider-container slider-left">
       <app-animated-slider class="app-slider" [value]="parameters.particleCount" (valueChange)="parameters.particleCount = $event;parametersChange.emit(parameters)" (onUp)="changeURL()"
@@ -51,12 +57,14 @@
       <div class="app-slider-label">Lifetime</div>
     </div>
   </div>
+  <div class="divider field-divider"></div>
   <div class="field-container checkbox-field">
     <div class="checkbox-container">
       <input #normalize type="checkbox" [ngModel]="parameters.normalize" (ngModelChange)="parameters.normalize = $event; changeURL()" (keydown.enter)="blur()">
       <label for="normalize" class="after-label">Normalize</label>
     </div>
   </div>
+  <div class="divider field-divider"></div>
   <div id="slow-field" class="field-container color-picker">
     <label for="c2" class="before-label">Slow</label>
     <div class="cp_wrapper">

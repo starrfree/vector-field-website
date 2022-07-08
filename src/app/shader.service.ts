@@ -91,7 +91,7 @@ export class ShaderService {
   }
 
   public checkUpdateShader(x: string, y: string): boolean {
-    const updateVertexShaderSource = this.updateVertexSource.replace("$$x$$", x).replace("$$y$$", y)
+    var updateVertexShaderSource = this.transformUpdateShader(x, y)
     const shader = this.gl.createShader(this.gl.VERTEX_SHADER)
     if (!shader) {
       return false
@@ -103,5 +103,16 @@ export class ShaderService {
       return false
     }
     return true
+  }
+
+  public transformUpdateShader(x: string, y: string) {
+    var newX = x.replace(/\d+\.?\d+/g, (match) => {
+      return match.includes('.') ? match : match + '.0';
+    });
+    var newY = y.replace(/\d+\.?\d+/g, (match) => {
+      return match.includes('.') ? match : match + '.0';
+    });
+    var updateVertexShaderSource = this.updateVertexSource.replace("$$x$$", newX).replace("$$y$$", newY)
+    return updateVertexShaderSource
   }
 }

@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { SceneCanvasComponent } from './scene-canvas/scene-canvas.component';
 
 @Component({
@@ -10,10 +10,9 @@ export class AppComponent {
   @ViewChild(SceneCanvasComponent) sceneComponent!: SceneCanvasComponent;
 
   title = 'Vector Field';
-  
   parameters = {
-    x: "cos(10.0 * y)",
-    y: "sin(20.0 * x)",
+    x: "x",//"cos(10.0 * y)",
+    y: "y",//"sin(20.0 * x)",
     t: 0,
     minT: 0,
     maxT: 10,
@@ -26,8 +25,17 @@ export class AppComponent {
     color1: [1, 1, 1, 1],
     color2: [0.4, 0.4, 1, 1]
   }
+  fullScreen: boolean = false
+
+  ngOnInit() {
+  }
 
   initialize(event: any) {
-    this.sceneComponent.initialize();
+    this.sceneComponent.initialize()
+  }
+
+  toggleFullScreen(): void {
+    this.fullScreen = !this.fullScreen
+    this.sceneComponent.toogleFullScreen(this.fullScreen)
   }
 }

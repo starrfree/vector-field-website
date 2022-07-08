@@ -13,7 +13,7 @@ import { ActivatedRoute, Router } from '@angular/router'
   styleUrls: ['./scene-canvas.component.css']
 })
 export class SceneCanvasComponent implements OnInit {
-  @ViewChild('glCanvas') private canvas!: ElementRef
+  @ViewChild('glCanvas') public canvas!: ElementRef
   
   @Input() parameters: any = {};
   @Output() parametersChange = new EventEmitter<any>();
@@ -22,6 +22,7 @@ export class SceneCanvasComponent implements OnInit {
       this.reset = true
     }
   }
+  canvasWidthOffset = '270px'
   dt: number = 1.0/60
   mousePosition: [number, number] = [0.0, 0.0]
   mouseIsActive: boolean = false
@@ -64,6 +65,11 @@ export class SceneCanvasComponent implements OnInit {
     this.didInit = true
   }
 
+  public toogleFullScreen = (state: boolean) => {
+    this.canvasWidthOffset = state ? '0px' : '270px'
+    setTimeout(() => this.initialize(), 310)
+  }
+
   main(): void {
     const gl = this.canvas.nativeElement.getContext("webgl2")
     // gl.getExtension("EXT_color_buffer_float")
@@ -75,7 +81,7 @@ export class SceneCanvasComponent implements OnInit {
     this.shaderService.gl = gl;
     this.buffers = this.initBuffers(gl)
     this.textures = this.initTextures(gl, this.canvas.nativeElement.width, this.canvas.nativeElement.height)
-    const updateVertexShaderSource = this.shaderService.updateVertexSource.replace("$$x$$", this.parameters.x).replace("$$y$$", this.parameters.y)
+    var updateVertexShaderSource = this.shaderService.transformUpdateShader(this.parameters.x, this.parameters.y)
     const updateShaderProgram = this.shaderService.initShaderProgram(gl, updateVertexShaderSource, this.shaderService.updateFragmentSource, ["o_Index", "o_Position", "o_Velocity", "o_Lifetime"])
     const renderShaderProgram = this.shaderService.initShaderProgram(gl, this.shaderService.renderVertexSource, this.shaderService.renderFragmentSource)
     const processShaderProgram = this.shaderService.initShaderProgram(gl, this.shaderService.processVertexSource, this.shaderService.processFragmentSource)

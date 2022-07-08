@@ -1,4 +1,6 @@
-<div class="canvas-container">
-  <canvas #glCanvas></canvas>
+<!-- @ -->
+<div class="canvas-container" style="position: absolute; right: 0; top: 0; text-align: right;
+ background-color: black; width: calc(100% - {{canvasWidthOffset}}); transition: 310ms width ease-in-out;">
+  <canvas #glCanvas style="height: 100vh; width: 100%;"></canvas>
   <div class="fps" style.color={{fpsColor()}}>{{fps | number : '1.0-0'}} fps</div>
 </div>

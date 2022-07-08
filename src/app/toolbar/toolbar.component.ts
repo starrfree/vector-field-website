@@ -102,6 +102,7 @@ export class ToolbarComponent implements OnInit {
       this.parameters.x = this.x
       this.parameters.y = this.y
       this.parametersChange.emit(this.parameters)
+      this.changeURL()
     }
   }
 

@@ -1,5 +1,5 @@
 .container {
-  width: 270px;
+  width: 250px;
 }
 
 .field-container {
@@ -49,6 +49,11 @@
   font-weight: 400;
 }
 
+.error-container {
+  width: 3px;
+  display: inline-flex;
+}
+
 .after-textfield {
   margin-left: .6em;
 }
@@ -68,6 +73,7 @@
 
 .color-picker {
   display: inline-block;
+  margin-top: -10px;
 }
 
 .small-field {
@@ -145,13 +151,19 @@ input[type='color'] {
 .divider {
   height: 0.5px;
   border-radius: 100px;
-  background-color: rgb(176, 176, 176);
-  display: inline-flex;
-  transform: translate(0, -5px);
+}
+
+.field-divider {
+  width: 100%;
+  margin: 0 10px 8px 10px;
+  background-color: rgb(76, 76, 76);
 }
 
 .range-divider {
+  background-color: rgb(176, 176, 176);
   width: 128px;
+  display: inline-flex;
+  transform: translate(0, -5px);
 }
 
 #tlabel {
@@ -160,6 +172,7 @@ input[type='color'] {
 
 .checkbox-field {
   margin-left: -6px;
+  margin-bottom: 10px;
 }
 
 .after-picker {
@@ -219,7 +232,7 @@ input[type="checkbox"]:checked::before {
 }
 
 .title {
-  padding: 20px 0 10px 20px;
+  padding: 20px 0 20px 20px;
 }
 
 .title-a {

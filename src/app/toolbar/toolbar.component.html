@@ -1,4 +1,5 @@
 <div class="container">
+  <div class="title">Vector Field</div>
   <div class="field-group">
     <div class="field-container">
       <span class="before-field">dx</span>
@@ -48,10 +49,12 @@
     </div>
   </div>
   <div class="field-container checkbox-field">
-    <input #normalize type="checkbox" [(ngModel)]="parameters.normalize" (keydown.enter)="blur()">
-    <label for="normalize" class="after-label">Normalize</label>
+    <div class="checkbox-container">
+      <input #normalize type="checkbox" [(ngModel)]="parameters.normalize" (keydown.enter)="blur()">
+      <label for="normalize" class="after-label">Normalize</label>
+    </div>
   </div>
-  <div class="field-container color-picker">
+  <div id="slow-field" class="field-container color-picker">
     <label for="c2" class="before-label">Slow</label>
     <div class="cp_wrapper">
       <input #c2 type="color" [(ngModel)]="color2" (change)="submitColors()" (keydown.enter)="blur()">

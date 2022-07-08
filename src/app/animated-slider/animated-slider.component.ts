@@ -1,4 +1,5 @@
 import { Component, ElementRef, HostListener, Input, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
+import { DeviceDetectorService } from 'ngx-device-detector';
 
 @Component({
   selector: 'app-animated-slider',
@@ -29,27 +30,50 @@ export class AnimatedSliderComponent implements OnInit {
     return y;
   }
 
-  constructor() { }
+  constructor(private deviceService: DeviceDetectorService) { }
 
   ngOnInit(): void {
     this.setTicks()
+    if (this.deviceService.isMobile()) {
+      document.addEventListener("touchmove", (event: any) => {
+        if (this.isDragged) {
+          this.updateValue(event.touches[0].clientY);
+          event.stopPropagation();
+          event.preventDefault();
+        }
+      }, {
+        passive: false
+      });
+    }
   }
 
   ngAfterViewInit(): void {
   }
-
+  
   @HostListener('mousedown', ['$event'])
   public onMouseDown(event: any): void {
-    this.isDragged = true;
-    this.updateValue(event.clientY, true);
+    if (!this.deviceService.isMobile()) {
+      this.isDragged = true;
+      this.updateValue(event.clientY, true);
+    }
   }
 
   @HostListener('window:mousemove', ['$event'])
   public onMouseMove(event: any): void {
-    if (this.isDragged) {
-      this.updateValue(event.clientY);
-      event.stopPropagation();
-      event.preventDefault();
+    if (!this.deviceService.isMobile()) {
+      if (this.isDragged) {
+        this.updateValue(event.clientY);
+        event.stopPropagation();
+        // event.prev entDefault();
+      }
+    }
+  }
+
+  @HostListener('touchstart', ['$event'])
+  public onTouchDown(event: any): void {
+    if (this.deviceService.isMobile()) {
+      this.isDragged = true;
+      this.updateValue(event.touches[0].clientY, true);
     }
   }
 
@@ -57,11 +81,11 @@ export class AnimatedSliderComponent implements OnInit {
   public onMouseUp(): void {
     this.isDragged = false;
   }
-  
-  // @HostListener('mouseleave')
-  // public onMouseLeave(): void {
-  //   this.isDragged = false;
-  // }
+
+  @HostListener('window:touchend')
+  public onTouchUp(): void {
+    this.isDragged = false;
+  }
 
   // prevent the dragstart event
   @HostListener('dragstart', ['$event'])

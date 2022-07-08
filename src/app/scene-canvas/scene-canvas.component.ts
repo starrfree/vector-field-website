@@ -1,9 +1,11 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core'
+import { Location } from '@angular/common'
 import { HttpClient } from '@angular/common/http'
 import { mat4 } from 'gl-matrix'
 import { Observable, fromEvent } from 'rxjs'
 import { DeviceDetectorService } from 'ngx-device-detector'
 import { ShaderService } from '../shader.service'
+import { ActivatedRoute, Router } from '@angular/router'
 
 @Component({
   selector: 'app-scene-canvas',
@@ -43,7 +45,9 @@ export class SceneCanvasComponent implements OnInit {
   reset: boolean = false
   didInit = false
 
-  constructor(private deviceService: DeviceDetectorService, private shaderService: ShaderService) {
+  constructor(private deviceService: DeviceDetectorService,
+     private shaderService: ShaderService,
+     private location: Location, private router: Router, private activatedRoute: ActivatedRoute) {
     shaderService.onInit = () => {
       if (this.didInit) {
         this.main()
@@ -51,7 +55,10 @@ export class SceneCanvasComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    const url = this.router.createUrlTree([], {relativeTo: this.activatedRoute, queryParams: this.parameters}).toString()
+    this.location.go(url);
+  }
 
   ngAfterViewInit(): void {
     if (this.shaderService.didInit && !this.didInit) {
@@ -162,10 +169,10 @@ export class SceneCanvasComponent implements OnInit {
       this.step++
       this.dt = .01 / (new Date().getTime() - startDt);
       startDt = new Date().getTime()
-      this.parameters.t += this.dt * 10.
       if (this.parameters.t > this.parameters.maxT) {
         this.parameters.t = this.parameters.minT
       }
+      this.parameters.t += this.dt * 10.
       this.parametersChange.emit(this.parameters)
     }
     requestAnimationFrame(render)

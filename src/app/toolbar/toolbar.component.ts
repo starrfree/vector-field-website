@@ -26,6 +26,12 @@ export class ToolbarComponent implements OnInit {
   }
   @Input() x = ""
   @Input() y = ""
+  @Input() ranges = {
+    minT: 0,
+    maxT: 10,
+    xRange: [-1, 1],
+    yRange: [-1, 1]
+  }
   @Output() parametersChange = new EventEmitter<any>()
   error = {
     x: false,
@@ -77,7 +83,9 @@ export class ToolbarComponent implements OnInit {
   }
 
   changeURL() {
-    const url = this.router.createUrlTree([], {relativeTo: this.activatedRoute, queryParams: this.parameters}).toString()
+    var params = Object.assign({}, this.parameters)
+    params.t = 0
+    const url = this.router.createUrlTree([], {relativeTo: this.activatedRoute, queryParams: params}).toString()
     this.location.go(url);
   }
 
@@ -144,48 +152,48 @@ export class ToolbarComponent implements OnInit {
     return "#" + this.componentToHex(r) + this.componentToHex(g) + this.componentToHex(b);
   }
 
-  setMinT(event: any) {
-    var x = Number(event)
+  setMinT() {
+    var x = Number(this.ranges.minT)
     if (isNaN(x) || !isFinite(x)) {
       x = 0
     }
     this.parameters.minT = x
   }
 
-  setMaxT(event: any) {
-    var x = Number(event)
+  setMaxT() {
+    var x = Number(this.ranges.maxT)
     if (isNaN(x) || !isFinite(x)) {
       x = 0
     }
     this.parameters.maxT = x
   }
 
-  setMinX(event: any) {
-    var x = Number(event)
+  setMinX() {
+    var x = Number(this.ranges.xRange[0])
     if (isNaN(x) || !isFinite(x)) {
       x = 0
     }
     this.parameters.xRange[0] = x
   }
 
-  setMaxX(event: any) {
-    var x = Number(event)
+  setMaxX() {
+    var x = Number(this.ranges.xRange[1])
     if (isNaN(x) || !isFinite(x)) {
       x = 0
     }
     this.parameters.xRange[1] = x
   }
   
-  setMinY(event: any) {
-    var x = Number(event)
+  setMinY() {
+    var x = Number(this.ranges.yRange[0])
     if (isNaN(x) || !isFinite(x)) {
       x = 0
     }
     this.parameters.yRange[0] = x
   }
 
-  setMaxY(event: any) {
-    var x = Number(event)
+  setMaxY() {
+    var x = Number(this.ranges.yRange[1])
     if (isNaN(x) || !isFinite(x)) {
       x = 0
     }

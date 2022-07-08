@@ -12,6 +12,7 @@ export class AnimatedSliderComponent implements OnInit {
   @Input() max: number = 1
   @Input() value: number = 0.5
   @Output() valueChange = new EventEmitter<number>()
+  @Output() onUp = new EventEmitter<any>()
   @Input() default: number = 0.5
   @Input() color: string = "#3273F6"
   @Input() icon: string | null = null
@@ -80,11 +81,13 @@ export class AnimatedSliderComponent implements OnInit {
   @HostListener('window:mouseup')
   public onMouseUp(): void {
     this.isDragged = false;
+    this.onUp.emit()
   }
 
   @HostListener('window:touchend')
   public onTouchUp(): void {
     this.isDragged = false;
+    this.onUp.emit()
   }
 
   // prevent the dragstart event

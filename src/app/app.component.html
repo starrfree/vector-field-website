@@ -1,6 +1,12 @@
 <div class="container">
   <app-scene-canvas id="scene-canvas" class="notscrollable" [(parameters)]="parameters"></app-scene-canvas>
-  <app-toolbar class="scrollable" [parameters]="parameters" (parametersChange)="parameters = $event;initialize($event)" [x]="parameters.x" [y]="parameters.y"></app-toolbar>
+  <app-toolbar class="scrollable" [parameters]="parameters" (parametersChange)="parameters = $event;initialize($event)" [x]="parameters.x" [y]="parameters.y" 
+  [ranges]="{
+    minT: parameters.minT,
+    maxT: parameters.maxT,
+    xRange: [parameters.xRange[0], parameters.xRange[1]],
+    yRange: [parameters.yRange[0], parameters.yRange[1]]
+  }"></app-toolbar>
 </div>
 <script>
   if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {

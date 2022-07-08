@@ -5,48 +5,48 @@
   <div class="field-group">
     <div class="field-container">
       <span class="before-field">dx</span>
-      <input type="text" class="text-field" [ngModel]="x" (ngModelChange)="x = $event; changeURL()" (input)="checkXY()" (focusout)="submitXY(); changeURL()" (keydown.enter)="blur()">
+      <input type="text" class="text-field" [(ngModel)]="x" (input)="checkXY()" (focusout)="submitXY(); changeURL()" (keydown.enter)="blur()">
       <span *ngIf="error.x" class="error after-textfield">err</span>
     </div>
     <div class="field-container">
       <span class="before-field">dy</span>
-      <input type="text" class="text-field" [ngModel]="y"  (ngModelChange)="y = $event; changeURL()" (input)="checkXY()" (focusout)="submitXY(); changeURL()" (keydown.enter)="blur()">
+      <input type="text" class="text-field" [(ngModel)]="y" (input)="checkXY()" (focusout)="submitXY(); changeURL()" (keydown.enter)="blur()">
       <span *ngIf="error.y" class="error after-textfield">err</span>
     </div>
   </div>
   <div class="field-group">
     <div class="field-container">
       <span id="tlabel" class="before-label">t</span>
-      <input type="text" class="text-field before-label after-label small-field" [ngModel]="parameters.minT" (ngModelChange)="setMinT($event); changeURL()" (keydown.enter)="blur()">
+      <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.minT" (focusout)="setMinT(); changeURL()" (keydown.enter)="blur()">
       <input type="range" class="small-slider dark-background-slider" [attr.min]="parameters.minT" [attr.max]="parameters.maxT" step="0.01"
        [ngModel]="parameters.t" (ngModelChange)="parameters.t = $event; changeURL()" (keydown.enter)="blur()">
-      <input type="text" class="text-field before-label after-label small-field" [ngModel]="parameters.maxT" (ngModelChange)="setMaxT($event); changeURL()" (keydown.enter)="blur()">
+      <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.maxT" (focusout)="setMaxT(); changeURL()" (keydown.enter)="blur()">
     </div>
     <div class="field-container">
       <span class="before-label">x</span>
-      <input type="text" class="text-field before-label after-label small-field" [ngModel]="parameters.xRange[0]" (ngModelChange)="setMinX($event); changeURL()" (keydown.enter)="blur()">
+      <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.xRange[0]" (focusout)="setMinX(); changeURL()" (keydown.enter)="blur()">
       <div class="divider range-divider"></div>
-      <input type="text" class="text-field before-label after-label small-field" [ngModel]="parameters.xRange[1]" (ngModelChange)="setMaxX($event); changeURL()" (keydown.enter)="blur()">
+      <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.xRange[1]" (focusout)="setMaxX(); changeURL()" (keydown.enter)="blur()">
     </div>
     <div class="field-container">
       <span class="before-label">y</span>
-      <input type="text" class="text-field before-label after-label small-field" [ngModel]="parameters.yRange[0]" (ngModelChange)="setMinY($event); changeURL()" (keydown.enter)="blur()">
+      <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.yRange[0]" (focusout)="setMinY(); changeURL()" (keydown.enter)="blur()">
       <div class="divider range-divider"></div>
-      <input type="text" class="text-field before-label after-label small-field" [ngModel]="parameters.yRange[1]" (ngModelChange)="setMaxY($event); changeURL()" (keydown.enter)="blur()">
+      <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.yRange[1]" (focusout)="setMaxY(); changeURL()" (keydown.enter)="blur()">
     </div>
   </div>
   <div class="field-group">
     <div class="field-container inline slider-container slider-left">
-      <app-animated-slider class="app-slider" [value]="parameters.particleCount" (valueChange)="parameters.particleCount = $event;parametersChange.emit(parameters); changeURL()"
+      <app-animated-slider class="app-slider" [value]="parameters.particleCount" (valueChange)="parameters.particleCount = $event;parametersChange.emit(parameters)" (onUp)="changeURL()"
       [min]="100" [max]="100000" [default]="10000"></app-animated-slider>
       <div class="app-slider-label">Particles</div>
     </div>
     <div class="field-container inline slider-container slider-middle">
-      <app-animated-slider class="app-slider" [value]="parameters.speed" (valueChange)="parameters.speed = $event; changeURL()" [min]="0.01" [max]="10" [default]="1" [color]="'coral'"></app-animated-slider>
+      <app-animated-slider class="app-slider" [value]="parameters.speed" (valueChange)="parameters.speed = $event" (onUp)="changeURL()" [min]="0.01" [max]="10" [default]="1" [color]="'coral'"></app-animated-slider>
       <div class="app-slider-label">Speed</div>
     </div>
     <div class="field-container inline slider-container slider-right">
-      <app-animated-slider class="app-slider textblack" [value]="parameters.lifetime" (valueChange)="parameters.lifetime = $event; parametersChange.emit(parameters); changeURL()"
+      <app-animated-slider class="app-slider textblack" [value]="parameters.lifetime" (valueChange)="parameters.lifetime = $event; parametersChange.emit(parameters)" (onUp)="changeURL()"
       [min]="1" [max]="1000" [default]="100" [color]="'lightgreen'"></app-animated-slider>
       <div class="app-slider-label">Lifetime</div>
     </div>

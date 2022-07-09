@@ -39,7 +39,7 @@ void main() {
   if (u_Normalize == 1 && length(o_Velocity) != 0.0) {
     o_Velocity = o_Velocity / length(o_Velocity);
   }
-  vec2 newPosition = i_Position + i_Velocity * dt * u_Speed * 2.0;
+  vec2 newPosition = i_Position + i_Velocity * dt * u_Speed / 5000.0;
   float newLifetime = i_Lifetime - 1.0;
   if (newPosition.x < -1.0 || newPosition.x > 1.0 || newPosition.y < -1.0 || newPosition.y > 1.0 || i_Lifetime <= 0.0) {
     newPosition.x = random(uint(uint(i_Index) + hash(uint(u_Step))) * uint(3)) * 2.0 - 1.0; // rand(i_Position + 2.0 * i_Velocity, 1234.0)

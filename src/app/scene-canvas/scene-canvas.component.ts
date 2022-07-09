@@ -170,12 +170,14 @@ export class SceneCanvasComponent implements OnInit {
         startFPS = new Date().getTime();
       }
       this.step++
-      this.dt = .01 / (new Date().getTime() - startDt);
+      this.dt = (new Date().getTime() - startDt);
       startDt = new Date().getTime()
       if (this.parameters.t > this.parameters.maxT) {
         this.parameters.t = this.parameters.minT
       }
-      this.parameters.t += this.dt * 10.
+      if (this.dt > 0) {
+        this.parameters.t += .01 / this.dt * 10.
+      }
       this.parametersChange.emit(this.parameters)
     }
     requestAnimationFrame(render)
@@ -260,7 +262,7 @@ export class SceneCanvasComponent implements OnInit {
     const corners = gl.createBuffer()
     gl.bindBuffer(gl.ARRAY_BUFFER, corners)
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
-
+    gl.bindBuffer(gl.ARRAY_BUFFER, null)
     return {
       input: input,
       output: output,

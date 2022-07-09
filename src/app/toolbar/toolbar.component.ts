@@ -37,8 +37,22 @@ export class ToolbarComponent implements OnInit {
     x: false,
     y: false
   }
-  color1 = "#ffffff"
-  color2 = "#6666ff"
+  
+  _color1: string = "#ffffff"
+  get color1() : string {
+    return this._color1
+  }
+  set color1(val: string) {
+    this._color1 = val
+  }
+
+  _color2: string = "#6666ff"
+  get color2() : string {
+    return this._color2
+  }
+  set color2(val: string) {
+    this._color2 = val
+  }
 
   constructor(private shaderService: ShaderService,
     private location: Location, private router: Router, private activatedRoute: ActivatedRoute) { }

@@ -105,11 +105,11 @@ export class ShaderService {
     return true
   }
 
-  public transformUpdateShader(x: string, y: string) {
-    var newX = x.replace(/\d+\.?\d+/g, (match) => {
+  public transformUpdateShader(x: string, y: string): string {
+    var newX = x.replace(/\d*\.?\d+/g, (match) => {
       return match.includes('.') ? match : match + '.0';
     });
-    var newY = y.replace(/\d+\.?\d+/g, (match) => {
+    var newY = y.replace(/\d*\.?\d+/g, (match) => {
       return match.includes('.') ? match : match + '.0';
     });
     var updateVertexShaderSource = this.updateVertexSource.replace("$$x$$", newX).replace("$$y$$", newY)

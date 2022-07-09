@@ -78,6 +78,7 @@
 .color-picker {
   display: inline-block;
   margin-top: -10px;
+  margin-bottom: 20px;
 }
 
 .small-field {
@@ -246,3 +247,16 @@ input[type="checkbox"]:checked::before {
   text-decoration: none;
 }
 
+.github-a {
+  text-decoration: underline;
+  color: gray;
+}
+
+.github-text {
+  font-weight: 400;
+  color: gray;
+  position: absolute;
+  bottom: 10px;
+  top: 580px;
+  margin-left: 10px;
+}

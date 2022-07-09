@@ -46,4 +46,4 @@ On the bottom right hand corner of the simulation canvas there is an indicator o
 
 ## URL
 Any change to the parameters will update the website URL. Therefore to undo an action users can use their browser back button.
-This also allows users to share a simulation with its parameters.
+This also allows users to share or save a simulation and its parameters.

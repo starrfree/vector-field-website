@@ -6,6 +6,8 @@ They are simulated using __WebGL__ therefore the simulation runs on the GPU.
 ## dx, dy
 Functions of `x`, `y` and `t`.
 Define the elementary movement of a particle given its `x, y` coordinates and time `t`.
+These are set by the user using the corresponding fields.
+One can use basic operations like `+`, `-`, `*`, `/` as well as elementary functions such as `cos`, `sin`, `tan`, `exp`, `pow(_, _)`, `sqrt`, etc.
 
 ## Time
 Variable: `t`.

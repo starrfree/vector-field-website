@@ -8,3 +8,19 @@ body {
   height: 100%;
   overflow-x: hidden;
 }
+
+input {
+  outline: none;
+}
+
+input:focus {
+  outline: 1px solid gray !important;
+}
+
+a {
+  outline: none;
+}
+
+a:focus {
+  outline: 1px solid gray !important;
+}

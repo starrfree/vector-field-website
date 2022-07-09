@@ -32,6 +32,10 @@
   width: 190px;
 }
 
+.xy-text-field {
+  padding: 4px 5px;
+}
+
 .after-label {
   margin-left: .6em;
   position: relative;

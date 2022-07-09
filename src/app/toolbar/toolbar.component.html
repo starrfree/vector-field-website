@@ -5,14 +5,14 @@
   <div class="field-group">
     <div class="field-container">
       <span class="before-field">dx</span>
-      <input type="text" class="text-field" [(ngModel)]="x" (input)="checkXY()" (focusout)="submitXY()" (keydown.enter)="blur()">
+      <input type="text" class="text-field xy-text-field" [(ngModel)]="x" (input)="checkXY()" (focusout)="submitXY()" (keydown.enter)="blur()">
       <div class="error-container">
         <span *ngIf="error.x" class="error after-textfield">err</span>
       </div>
     </div>
     <div class="field-container">
       <span class="before-field">dy</span>
-      <input type="text" class="text-field" [(ngModel)]="y" (input)="checkXY()" (focusout)="submitXY()" (keydown.enter)="blur()">
+      <input type="text" class="text-field xy-text-field" [(ngModel)]="y" (input)="checkXY()" (focusout)="submitXY()" (keydown.enter)="blur()">
       <div class="error-container">
         <span *ngIf="error.y" class="error after-textfield">err</span>
       </div>

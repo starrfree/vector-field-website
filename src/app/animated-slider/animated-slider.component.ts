@@ -10,7 +10,17 @@ export class AnimatedSliderComponent implements OnInit {
   @ViewChild('wrapper') private slider!: ElementRef
   @Input() min: number = 0
   @Input() max: number = 1
-  @Input() value: number = 0.5
+  
+  private _value: number = 5;
+  public get value(): number {
+    return this._value
+  }
+  @Input() public set value(v: number) {
+    this._value = v
+    this.setTicks()
+  }
+  
+  // value: number = 0.5
   @Output() valueChange = new EventEmitter<number>()
   @Output() onUp = new EventEmitter<any>()
   @Input() default: number = 0.5

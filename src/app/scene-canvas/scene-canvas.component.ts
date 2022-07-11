@@ -410,7 +410,7 @@ export class SceneCanvasComponent implements OnInit {
           offset)
         gl.enableVertexAttribArray(programInfo.attribLocations.render.vertexPosition)
       }
-      gl.bindTexture(gl.TEXTURE_2D, this.textures.textures[(this.textureOffset + 1) % 2]);
+      gl.bindTexture(gl.TEXTURE_2D, this.textures.textures[(this.textureOffset) % 2]);
       gl.uniform1f(programInfo.uniformLocations.render.width, gl.canvas.width)
       gl.uniform1f(programInfo.uniformLocations.render.height, gl.canvas.height)
       gl.uniform1i(programInfo.uniformLocations.render.texture, 0);

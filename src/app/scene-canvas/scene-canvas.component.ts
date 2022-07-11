@@ -103,6 +103,7 @@ export class SceneCanvasComponent implements OnInit {
           dt: gl.getUniformLocation(updateShaderProgram, 'dt'),
           xRange: gl.getUniformLocation(updateShaderProgram, 'u_xRange'),
           yRange: gl.getUniformLocation(updateShaderProgram, 'u_yRange'),
+          zRange: gl.getUniformLocation(updateShaderProgram, 'u_zRange'),
           lifetime: gl.getUniformLocation(updateShaderProgram, 'u_Lifetime'),
           step: gl.getUniformLocation(updateShaderProgram, 'u_Step'),
           normalize: gl.getUniformLocation(updateShaderProgram, 'u_Normalize'),
@@ -338,6 +339,7 @@ export class SceneCanvasComponent implements OnInit {
       gl.uniform1f(programInfo.uniformLocations.update.dt, this.dt)
       gl.uniform2f(programInfo.uniformLocations.update.xRange, this.parameters.xRange[0], this.parameters.xRange[1])
       gl.uniform2f(programInfo.uniformLocations.update.yRange, this.parameters.yRange[0], this.parameters.yRange[1])
+      gl.uniform2f(programInfo.uniformLocations.update.zRange, this.parameters.zRange[0], this.parameters.zRange[1])
       gl.uniform1f(programInfo.uniformLocations.update.lifetime, this.parameters.lifetime)
       gl.uniform1i(programInfo.uniformLocations.update.step, this.step)
       gl.uniform1i(programInfo.uniformLocations.update.normalize, this.parameters.normalize)

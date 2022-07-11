@@ -46,6 +46,12 @@
       <div class="divider range-divider"></div>
       <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.yRange[1]" (focusout)="setMaxY(); changeURL()" (keydown.enter)="blur()">
     </div>
+    <div class="field-container">
+      <span class="before-label">z</span>
+      <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.zRange[0]" (focusout)="setMinZ(); changeURL()" (keydown.enter)="blur()">
+      <div class="divider range-divider"></div>
+      <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.zRange[1]" (focusout)="setMaxZ(); changeURL()" (keydown.enter)="blur()">
+    </div>
   </div>
   <div class="divider field-divider"></div>
   <div class="field-group">

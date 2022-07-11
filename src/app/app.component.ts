@@ -19,6 +19,7 @@ export class AppComponent {
     maxT: 10,
     xRange: [-1, 1],
     yRange: [-1, 1],
+    zRange: [-1, 1],
     lifetime: 100,
     particleCount: 10000,
     normalize: false,

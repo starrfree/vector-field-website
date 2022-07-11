@@ -18,6 +18,7 @@ export class ToolbarComponent implements OnInit {
     maxT: 10,
     xRange: [-1, 1],
     yRange: [-1, 1],
+    zRange: [-1, 1],
     lifetime: 100,
     particleCount: 10000,
     normalize: false,
@@ -32,7 +33,8 @@ export class ToolbarComponent implements OnInit {
     minT: 0,
     maxT: 10,
     xRange: [-1, 1],
-    yRange: [-1, 1]
+    yRange: [-1, 1],
+    zRange: [-1, 1]
   }
   @Output() parametersChange = new EventEmitter<any>()
   error = {
@@ -157,7 +159,9 @@ export class ToolbarComponent implements OnInit {
     var maxXError = isNaN(Number(params.xRange[1]))
     var minYError = isNaN(Number(params.yRange[0]))
     var maxYError = isNaN(Number(params.yRange[1]))
-    return xError || yError || zError || minTError || maxTError || minXError || maxXError || minYError || maxYError || particleCountError || lifetimeError || speedError || tError
+    var minZError = isNaN(Number(params.zRange[0]))
+    var maxZError = isNaN(Number(params.zRange[1]))
+    return xError || yError || zError || minTError || maxTError || minXError || maxXError || minYError || maxYError || minZError || maxZError || particleCountError || lifetimeError || speedError || tError
   }
 
   hexToRGB(hex: string) {
@@ -220,5 +224,21 @@ export class ToolbarComponent implements OnInit {
       n = 0
     }
     this.parameters.yRange[1] = n
+  }
+
+  setMinZ() {
+    var n = Number(this.ranges.zRange[0])
+    if (isNaN(n) || !isFinite(n)) {
+      n = 0
+    }
+    this.parameters.zRange[0] = n
+  }
+
+  setMaxZ() {
+    var n = Number(this.ranges.zRange[1])
+    if (isNaN(n) || !isFinite(n)) {
+      n = 0
+    }
+    this.parameters.zRange[1] = n
   }
 }

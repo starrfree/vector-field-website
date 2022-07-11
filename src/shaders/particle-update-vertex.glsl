@@ -7,6 +7,7 @@ uniform float t;
 uniform float dt;
 uniform vec2 u_xRange;
 uniform vec2 u_yRange;
+uniform vec2 u_zRange;
 uniform float u_Lifetime;
 uniform int u_Step;
 uniform int u_Normalize;
@@ -34,7 +35,7 @@ float random(uint seed);
 void main() {
   float x = (i_Position.x + 1.0) / 2.0 * (u_xRange.y - u_xRange.x) + u_xRange.x;
   float y = (i_Position.y + 1.0) / 2.0 * (u_yRange.y - u_yRange.x) + u_yRange.x;
-  float z = (i_Position.z + 1.0) / 2.0 * (u_yRange.y - u_yRange.x) + u_yRange.x;
+  float z = (i_Position.z + 1.0) / 2.0 * (u_zRange.y - u_zRange.x) + u_zRange.x;
   vec3 vect = vec3($$x$$, $$y$$, $$z$$);
   // o_Velocity = vec2(cos(y * 10.0), sin(x * 20.0));
   // o_Velocity = vec2(x*x - y*y, x*y);

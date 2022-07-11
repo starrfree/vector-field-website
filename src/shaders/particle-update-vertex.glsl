@@ -1,6 +1,8 @@
 # version 300 es
 precision highp float;
 
+uniform mat4 u_ModelViewMatrix;
+uniform mat4 u_ProjectionMatrix;
 uniform float t;
 uniform float dt;
 uniform vec2 u_xRange;
@@ -14,13 +16,13 @@ uniform vec4 u_Color2;
 uniform float u_Size;
 
 in float i_Index;
-in vec2 i_Position;
-in vec2 i_Velocity;
+in vec3 i_Position;
+in vec3 i_Velocity;
 in float i_Lifetime;
 
 out float o_Index;
-out vec2 o_Position;
-out vec2 o_Velocity;
+out vec3 o_Position;
+out vec3 o_Velocity;
 out float o_Lifetime;
 
 out vec4 o_Color;
@@ -32,19 +34,21 @@ float random(uint seed);
 void main() {
   float x = (i_Position.x + 1.0) / 2.0 * (u_xRange.y - u_xRange.x) + u_xRange.x;
   float y = (i_Position.y + 1.0) / 2.0 * (u_yRange.y - u_yRange.x) + u_yRange.x;
-  vec2 vect = vec2($$x$$, $$y$$);
+  float z = (i_Position.z + 1.0) / 2.0 * (u_yRange.y - u_yRange.x) + u_yRange.x;
+  vec3 vect = vec3($$x$$, $$y$$, $$z$$);
   // o_Velocity = vec2(cos(y * 10.0), sin(x * 20.0));
   // o_Velocity = vec2(x*x - y*y, x*y);
   o_Velocity = vect;
   if (u_Normalize == 1 && length(o_Velocity) != 0.0) {
     o_Velocity = o_Velocity / length(o_Velocity);
   }
-  vec2 newPosition = i_Position + i_Velocity * dt * u_Speed / 5000.0;
+  vec3 newPosition = i_Position + i_Velocity * dt * u_Speed / 5000.0;
   float newLifetime = i_Lifetime - 1.0;
-  if (newPosition.x < -1.0 || newPosition.x > 1.0 || newPosition.y < -1.0 || newPosition.y > 1.0 || i_Lifetime <= 0.0) {
-    newPosition.x = random(uint(uint(i_Index) + hash(uint(u_Step))) * uint(3)) * 2.0 - 1.0; // rand(i_Position + 2.0 * i_Velocity, 1234.0)
-    newPosition.y = random(uint(uint(i_Index) + hash(uint(u_Step))) * uint(3) + uint(1)) * 2.0 - 1.0; // rand(i_Position - i_Lifetime, 3456.0)
-    newLifetime = u_Lifetime + random(uint(uint(i_Index) + hash(uint(u_Step))) * uint(3) + uint(2)) * u_Lifetime; // rand(newPosition * i_Velocity, 2431.0)
+  if (newPosition.x < -1.0 || newPosition.x > 1.0 || newPosition.y < -1.0 || newPosition.y > 1.0  || newPosition.z < -1.0 || newPosition.z > 1.0 || i_Lifetime <= 0.0) {
+    newPosition.x = random(uint(uint(i_Index) + hash(uint(u_Step))) * uint(4)) * 2.0 - 1.0; // rand(i_Position + 2.0 * i_Velocity, 1234.0)
+    newPosition.y = random(uint(uint(i_Index) + hash(uint(u_Step))) * uint(4) + uint(1)) * 2.0 - 1.0; // rand(i_Position - i_Lifetime, 3456.0)
+    newPosition.z = random(uint(uint(i_Index) + hash(uint(u_Step))) * uint(4) + uint(2)) * 2.0 - 1.0;
+    newLifetime = u_Lifetime + random(uint(uint(i_Index) + hash(uint(u_Step))) * uint(4) + uint(3)) * u_Lifetime; // rand(newPosition * i_Velocity, 2431.0)
   }
   o_Lifetime = newLifetime;
   o_Position = newPosition;
@@ -56,8 +60,8 @@ void main() {
     color = vec4(0.0, 0.0, 1.0, 1.0);
   }
   o_Color = clamp(color, 0.0, 1.0);
-  gl_PointSize = u_Size * 4.0;
-  gl_Position = vec4(i_Position, 0.0, 1.0);
+  gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(i_Position, 1.0);
+  gl_PointSize = u_Size * 3.0 * ((u_ModelViewMatrix * vec4(i_Position, 1.0)).z + 5.0);
 }
 
 // float rand(vec2 xy, float seed) {

@@ -17,6 +17,13 @@
         <span *ngIf="error.y" class="error after-textfield">err</span>
       </div>
     </div>
+    <div class="field-container">
+      <span class="before-field">dz</span>
+      <input type="text" class="text-field xy-text-field" [(ngModel)]="z" (input)="checkXY()" (focusout)="submitXY()" (keydown.enter)="blur()">
+      <div class="error-container">
+        <span *ngIf="error.z" class="error after-textfield">err</span>
+      </div>
+    </div>
   </div>
   <div class="divider field-divider"></div>
   <div class="field-group">

@@ -13,6 +13,7 @@ export class AppComponent {
   parameters = {
     x: "x",//"cos(10.0 * y)",
     y: "y",//"sin(20.0 * x)",
+    z: "z",
     t: 0,
     minT: 0,
     maxT: 10,

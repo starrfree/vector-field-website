@@ -29,6 +29,7 @@ export class SceneCanvasComponent implements OnInit {
   public fps: number = 1.0/120
   step: number = 0
   size: number = 1
+  cubeRotation: number = 0
 
   fpsColor = () => {
     if (this.fps > 30) {
@@ -81,7 +82,7 @@ export class SceneCanvasComponent implements OnInit {
     this.shaderService.gl = gl;
     this.buffers = this.initBuffers(gl)
     this.textures = this.initTextures(gl, this.canvas.nativeElement.width, this.canvas.nativeElement.height)
-    var updateVertexShaderSource = this.shaderService.transformUpdateShader(this.parameters.x, this.parameters.y)
+    var updateVertexShaderSource = this.shaderService.transformUpdateShader(this.parameters.x, this.parameters.y, this.parameters.z)
     const updateShaderProgram = this.shaderService.initShaderProgram(gl, updateVertexShaderSource, this.shaderService.updateFragmentSource, ["o_Index", "o_Position", "o_Velocity", "o_Lifetime"])
     const renderShaderProgram = this.shaderService.initShaderProgram(gl, this.shaderService.renderVertexSource, this.shaderService.renderFragmentSource)
     const processShaderProgram = this.shaderService.initShaderProgram(gl, this.shaderService.processVertexSource, this.shaderService.processFragmentSource)
@@ -96,6 +97,8 @@ export class SceneCanvasComponent implements OnInit {
       processProgram: processShaderProgram,
       uniformLocations: {
         update: {
+          modelMatrix: gl.getUniformLocation(updateShaderProgram, 'u_ModelViewMatrix'),
+          projectionMatrix: gl.getUniformLocation(updateShaderProgram, 'u_ProjectionMatrix'),
           t: gl.getUniformLocation(updateShaderProgram, 't'),
           dt: gl.getUniformLocation(updateShaderProgram, 'dt'),
           xRange: gl.getUniformLocation(updateShaderProgram, 'u_xRange'),
@@ -175,8 +178,9 @@ export class SceneCanvasComponent implements OnInit {
       if (this.parameters.t > this.parameters.maxT) {
         this.parameters.t = this.parameters.minT
       }
-      if (this.dt > 0) {
+      if (this.dt > 0) {
         this.parameters.t += .01 / this.dt * 10.
+        this.cubeRotation += this.dt / 2000;
       }
       this.parametersChange.emit(this.parameters)
     }
@@ -238,10 +242,12 @@ export class SceneCanvasComponent implements OnInit {
       // POSITION
       values.push(r())
       values.push(r())
+      values.push(r())
       
       // VELOCITY
-      values.push(r() * 3)
-      values.push(r() * 3)
+      values.push(0)
+      values.push(0)
+      values.push(0)
 
       // LIFETIME
       values.push(r() * this.parameters.lifetime)
@@ -313,7 +319,21 @@ export class SceneCanvasComponent implements OnInit {
       gl.depthFunc(gl.LEQUAL)
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
+      const fieldOfView = 45 * Math.PI / 180;   // in radians
+      const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+      const zNear = 0.1;
+      const zFar = 100.0;
+      const projectionMatrix = mat4.create();
+      mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
+
+      const modelViewMatrix = mat4.create();
+      mat4.translate(modelViewMatrix, modelViewMatrix, [-0.0, 0.0, -4.0]);
+      mat4.rotate(modelViewMatrix, modelViewMatrix, Math.PI / 6, [0, 1, 0]);
+      mat4.rotate(modelViewMatrix, modelViewMatrix, .0 * this.cubeRotation, [0, 0, 1]);
+
       gl.useProgram(programInfo.updateProgram)
+      gl.uniformMatrix4fv(programInfo.uniformLocations.update.modelMatrix, false, modelViewMatrix)
+      gl.uniformMatrix4fv(programInfo.uniformLocations.update.projectionMatrix, false, projectionMatrix)
       gl.uniform1f(programInfo.uniformLocations.update.t, this.parameters.t)
       gl.uniform1f(programInfo.uniformLocations.update.dt, this.dt)
       gl.uniform2f(programInfo.uniformLocations.update.xRange, this.parameters.xRange[0], this.parameters.xRange[1])
@@ -328,12 +348,12 @@ export class SceneCanvasComponent implements OnInit {
       {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.input);
         var step = Float32Array.BYTES_PER_ELEMENT;
-        var total = 1 + 2 + 2 + 1;
+        var total = 1 + 3 + 3 + 1;
         var stride = step * total;
         gl.vertexAttribPointer(programInfo.attribLocations.update.indexInput, 1, gl.FLOAT, false, stride, 0);
-        gl.vertexAttribPointer(programInfo.attribLocations.update.positionInput, 2, gl.FLOAT, false, stride, step * 1);
-        gl.vertexAttribPointer(programInfo.attribLocations.update.velocityInput, 2, gl.FLOAT, false, stride, step * 3);
-        gl.vertexAttribPointer(programInfo.attribLocations.update.lifetimeInput, 1, gl.FLOAT, false, stride, step * 5);
+        gl.vertexAttribPointer(programInfo.attribLocations.update.positionInput, 3, gl.FLOAT, false, stride, step * 1);
+        gl.vertexAttribPointer(programInfo.attribLocations.update.velocityInput, 3, gl.FLOAT, false, stride, step * 4);
+        gl.vertexAttribPointer(programInfo.attribLocations.update.lifetimeInput, 1, gl.FLOAT, false, stride, step * 7);
         gl.enableVertexAttribArray(programInfo.attribLocations.update.indexInput);
         gl.enableVertexAttribArray(programInfo.attribLocations.update.positionInput);
         gl.enableVertexAttribArray(programInfo.attribLocations.update.velocityInput);

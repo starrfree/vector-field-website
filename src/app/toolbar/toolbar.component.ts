@@ -12,6 +12,7 @@ export class ToolbarComponent implements OnInit {
   @Input() parameters: any = {
     x: "x",
     y: "y",
+    z: "z",
     t: 0,
     minT: 0,
     maxT: 10,
@@ -26,6 +27,7 @@ export class ToolbarComponent implements OnInit {
   }
   @Input() x = ""
   @Input() y = ""
+  @Input() z = ""
   @Input() ranges = {
     minT: 0,
     maxT: 10,
@@ -35,7 +37,8 @@ export class ToolbarComponent implements OnInit {
   @Output() parametersChange = new EventEmitter<any>()
   error = {
     x: false,
-    y: false
+    y: false,
+    z: false
   }
   
   _color1: string = "#ffffff"
@@ -112,9 +115,10 @@ export class ToolbarComponent implements OnInit {
   
   submitXY() {
     this.checkXY()
-    if (!this.error.x && !this.error.y) {
+    if (!this.error.x && !this.error.y  && !this.error.z) {
       this.parameters.x = this.x
       this.parameters.y = this.y
+      this.parameters.z = this.z
       this.parametersChange.emit(this.parameters)
       this.changeURL()
     }
@@ -129,17 +133,20 @@ export class ToolbarComponent implements OnInit {
     if (!this.shaderService.didInit) {
       return
     }
-    var xError = !this.shaderService.checkUpdateShader(this.x, "y")
-    var yError = !this.shaderService.checkUpdateShader("x", this.y)
+    var xError = !this.shaderService.checkUpdateShader(this.x, "y", "z")
+    var yError = !this.shaderService.checkUpdateShader("x", this.y, "z")
+    var zError = !this.shaderService.checkUpdateShader("x", "y", this.z)
     this.error = {
       x: xError,
-      y: yError
+      y: yError,
+      z: zError
     }
   }
 
   checkParams(params: any) {
-    var xError = !this.shaderService.checkUpdateShader(params.x, "y")
-    var yError = !this.shaderService.checkUpdateShader("x", params.y)
+    var xError = !this.shaderService.checkUpdateShader(params.x, "y", "z")
+    var yError = !this.shaderService.checkUpdateShader("x", params.y, "z")
+    var zError = !this.shaderService.checkUpdateShader("x", "y", params.z)
     var particleCountError = isNaN(Number(params.particleCount))
     var lifetimeError = isNaN(Number(params.lifetime))
     var speedError = isNaN(Number(params.speed))
@@ -150,7 +157,7 @@ export class ToolbarComponent implements OnInit {
     var maxXError = isNaN(Number(params.xRange[1]))
     var minYError = isNaN(Number(params.yRange[0]))
     var maxYError = isNaN(Number(params.yRange[1]))
-    return xError || yError || minTError || maxTError || minXError || maxXError || minYError || maxYError || particleCountError || lifetimeError || speedError || tError
+    return xError || yError || zError || minTError || maxTError || minXError || maxXError || minYError || maxYError || particleCountError || lifetimeError || speedError || tError
   }
 
   hexToRGB(hex: string) {
@@ -168,50 +175,50 @@ export class ToolbarComponent implements OnInit {
   }
 
   setMinT() {
-    var x = Number(this.ranges.minT)
-    if (isNaN(x) || !isFinite(x)) {
-      x = 0
+    var n = Number(this.ranges.minT)
+    if (isNaN(n) || !isFinite(n)) {
+      n = 0
     }
-    this.parameters.minT = x
+    this.parameters.minT = n
   }
 
   setMaxT() {
-    var x = Number(this.ranges.maxT)
-    if (isNaN(x) || !isFinite(x)) {
-      x = 0
+    var n = Number(this.ranges.maxT)
+    if (isNaN(n) || !isFinite(n)) {
+      n = 0
     }
-    this.parameters.maxT = x
+    this.parameters.maxT = n
   }
 
   setMinX() {
-    var x = Number(this.ranges.xRange[0])
-    if (isNaN(x) || !isFinite(x)) {
-      x = 0
+    var n = Number(this.ranges.xRange[0])
+    if (isNaN(n) || !isFinite(n)) {
+      n = 0
     }
-    this.parameters.xRange[0] = x
+    this.parameters.xRange[0] = n
   }
 
   setMaxX() {
-    var x = Number(this.ranges.xRange[1])
-    if (isNaN(x) || !isFinite(x)) {
-      x = 0
+    var n = Number(this.ranges.xRange[1])
+    if (isNaN(n) || !isFinite(n)) {
+      n = 0
     }
-    this.parameters.xRange[1] = x
+    this.parameters.xRange[1] = n
   }
   
   setMinY() {
-    var x = Number(this.ranges.yRange[0])
-    if (isNaN(x) || !isFinite(x)) {
-      x = 0
+    var n = Number(this.ranges.yRange[0])
+    if (isNaN(n) || !isFinite(n)) {
+      n = 0
     }
-    this.parameters.yRange[0] = x
+    this.parameters.yRange[0] = n
   }
 
   setMaxY() {
-    var x = Number(this.ranges.yRange[1])
-    if (isNaN(x) || !isFinite(x)) {
-      x = 0
+    var n = Number(this.ranges.yRange[1])
+    if (isNaN(n) || !isFinite(n)) {
+      n = 0
     }
-    this.parameters.yRange[1] = x
+    this.parameters.yRange[1] = n
   }
 }

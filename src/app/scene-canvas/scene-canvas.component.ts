@@ -30,6 +30,10 @@ export class SceneCanvasComponent implements OnInit {
   step: number = 0
   size: number = 1
   cubeRotation: number = 0
+  cubeXRotation: number = 0
+  cubeYRotation: number = 0
+  lastCubeXRotation: number = 0
+  lastCubeYRotation: number = 0
 
   fpsColor = () => {
     if (this.fps > 30) {
@@ -186,10 +190,11 @@ export class SceneCanvasComponent implements OnInit {
       this.parametersChange.emit(this.parameters)
     }
     requestAnimationFrame(render)
-    /*
+
     const moveMouse = (event: any) => {
-      this.mousePosition = [event.pageX - 5, this.canvas.nativeElement.height - event.pageY + 5]
-      // this.drawScene(gl, programInfo)
+      this.mousePosition = [event.pageX, this.canvas.nativeElement.height - event.pageY]
+      this.cubeYRotation += event.movementX / 1000
+      this.cubeXRotation += event.movementY / 1000
     }
     if (this.deviceService.isMobile()) {
       console.log("Device is mobile")
@@ -203,23 +208,25 @@ export class SceneCanvasComponent implements OnInit {
       this.canvas.nativeElement.addEventListener('touchmove', (event: any) => {
         if (this.mouseIsActive) {
           moveMouse(event)
+          event.stopPropagation();
+          event.preventDefault();
         }
       }, false)
     } else {
-      this.canvas.nativeElement.addEventListener('mousedown', (event: any) => {
+      // this.canvas.nativeElement
+      document.addEventListener('mousedown', (event: any) => {
         this.mouseIsActive = true
         moveMouse(event)
       }, false)
-      this.canvas.nativeElement.addEventListener('mouseup', (event: any) => {
+      document.addEventListener('mouseup', (event: any) => {
         this.mouseIsActive = false
       }, false)
-      this.canvas.nativeElement.addEventListener('mousemove', (event: any) => {
+      document.addEventListener('mousemove', (event: any) => {
         if (this.mouseIsActive) {
           moveMouse(event)
         }
       }, false)
     }
-    */
 
     const resizeCanvas = () => {
       this.canvas.nativeElement.width = 3 * this.canvas.nativeElement.clientWidth
@@ -329,8 +336,10 @@ export class SceneCanvasComponent implements OnInit {
 
       const modelViewMatrix = mat4.create();
       mat4.translate(modelViewMatrix, modelViewMatrix, [-0.0, 0.0, -4.0]);
-      mat4.rotate(modelViewMatrix, modelViewMatrix, Math.PI / 6, [0, 1, 0]);
-      mat4.rotate(modelViewMatrix, modelViewMatrix, .0 * this.cubeRotation, [0, 0, 1]);
+      // mat4.rotate(modelViewMatrix, modelViewMatrix, Math.PI / 6, [0, 1, 0]);
+      // mat4.rotate(modelViewMatrix, modelViewMatrix, .0 * this.cubeRotation, [0, 0, 1]);
+      mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeYRotation, [0, 1, 0]);
+      mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeXRotation, [1, 0, 0]);
 
       gl.useProgram(programInfo.updateProgram)
       gl.uniformMatrix4fv(programInfo.uniformLocations.update.modelMatrix, false, modelViewMatrix)

@@ -26,6 +26,7 @@ export class ToolbarComponent implements OnInit {
     color1: [1, 1, 1, 1],
     color2: [0.4, 0.4, 1, 1]
   }
+  @Output() parametersChange = new EventEmitter<any>()
   @Input() x = ""
   @Input() y = ""
   @Input() z = ""
@@ -36,7 +37,6 @@ export class ToolbarComponent implements OnInit {
     yRange: [-1, 1],
     zRange: [-1, 1]
   }
-  @Output() parametersChange = new EventEmitter<any>()
   error = {
     x: false,
     y: false,

@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core'
 import { Location } from '@angular/common'
 import { HttpClient } from '@angular/common/http'
-import { mat4, ReadonlyVec3, vec4 } from 'gl-matrix'
+import { mat4, ReadonlyVec3, vec4, vec3, mat3 } from 'gl-matrix'
 import { Observable, fromEvent } from 'rxjs'
 import { DeviceDetectorService } from 'ngx-device-detector'
 import { ShaderService } from '../shader.service'
@@ -31,8 +31,7 @@ export class SceneCanvasComponent implements OnInit {
   size: number = 1
   cubeRotation: number = 0
   cubeXRotation: number = 0
-  cubeYRotation: number = 0//Math.PI / 8
-  frontAxis = [1, 0, 0]
+  cubeYRotation: number = Math.PI / 9
 
   fpsColor = () => {
     if (this.fps > 30) {
@@ -219,6 +218,8 @@ export class SceneCanvasComponent implements OnInit {
       this.mousePosition = [event.pageX, this.canvas.nativeElement.height - event.pageY]
       this.cubeYRotation += event.movementX / 360
       this.cubeXRotation += event.movementY / 360
+      // mat4.rotate(this.rotationMatrix, this.rotationMatrix, event.movementX / 360, [0, 1, 0])
+      // mat4.rotate(this.rotationMatrix, this.rotationMatrix, event.movementY / 360, [1, 0, 0])
     }
     if (this.deviceService.isMobile()) {
       console.log("Device is mobile")
@@ -241,13 +242,6 @@ export class SceneCanvasComponent implements OnInit {
         moveMouse(event)
       }, false)
       this.canvas.nativeElement.addEventListener('mouseup', (event: any) => {
-        // transform front axis
-        // const rotateMatrix = mat4.create();
-        // mat4.rotate(rotateMatrix, rotateMatrix, this.cubeYRotation, [0, 1, 0]);
-        // var newAxis = vec4.create();
-        // vec4.transformMat4(newAxis, [1, 0, 0, 1], rotateMatrix);
-        // this.frontAxis = [newAxis[0], newAxis[1], newAxis[2]]
-        // console.log(this.frontAxis)
         this.mouseIsActive = false
       }, false)
       this.canvas.nativeElement.addEventListener('mousemove', (event: any) => {
@@ -433,12 +427,28 @@ export class SceneCanvasComponent implements OnInit {
       const projectionMatrix = mat4.create();
       mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
 
-      const modelViewMatrix = mat4.create();
+      var modelViewMatrix = mat4.create();
       mat4.translate(modelViewMatrix, modelViewMatrix, [0.0, 0.0, -4.0]);
       // mat4.rotate(modelViewMatrix, modelViewMatrix, Math.PI / 6, [0, 1, 0]);
       // mat4.rotate(modelViewMatrix, modelViewMatrix, .0 * this.cubeRotation, [0, 0, 1]);
+      
+      // var yAxis = vec4.clone([0, 1, 0, 1]);
+      // {
+      //   var rotationMatrix = mat4.create();
+      //   mat4.rotate(rotationMatrix, rotationMatrix, this.cubeXRotation, [-1, 0, 0]);
+      //   vec4.transformMat4(yAxis, yAxis, rotationMatrix)
+      // }
+      // mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeYRotation, [yAxis[0], yAxis[1], yAxis[2]]);
+
+      var xAxis = vec4.clone([1, 0, 0, 1]);
+      {
+        var rotationMatrix = mat4.create();
+        mat4.rotate(rotationMatrix, rotationMatrix, this.cubeYRotation, [0, -1, 0]);
+        vec4.transformMat4(xAxis, xAxis, rotationMatrix)
+      }
       mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeYRotation, [0, 1, 0]);
-      mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeXRotation, [this.frontAxis[0], this.frontAxis[1], this.frontAxis[2]]);
+      mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeXRotation, [xAxis[0], xAxis[1], xAxis[2]]);
+
 
       gl.useProgram(programInfo.updateProgram)
       gl.uniformMatrix4fv(programInfo.uniformLocations.update.modelMatrix, false, modelViewMatrix)

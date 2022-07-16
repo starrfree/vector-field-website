@@ -252,11 +252,16 @@ input[type="checkbox"]:checked::before {
   color: gray;
 }
 
+.github-a:hover {
+  color: white;
+  /* font-weight: 700; */
+}
+
 .github-text {
   font-weight: 400;
   color: gray;
   position: absolute;
   bottom: 10px;
-  top: 640px;
+  top: 740px;
   margin-left: 10px;
 }

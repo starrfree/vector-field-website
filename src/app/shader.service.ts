@@ -12,6 +12,8 @@ export class ShaderService {
   renderFragmentSource = ""
   processVertexSource = ""
   processFragmentSource = ""
+  cubeRenderVertexSource = ""
+  cubeRenderFragmentSource = ""
   didInit = false
 
   onInit: Observable<any>
@@ -37,8 +39,16 @@ export class ShaderService {
                         this.http.get("shaders/texture-process-vertex.glsl", {responseType: 'text'})
                         .subscribe(res => {
                           this.processVertexSource = res
-                          this.didInit = true
-                          observer.next(true)
+                          this.http.get("shaders/cube-render-fragment.glsl", {responseType: 'text'})
+                            .subscribe(res => {
+                              this.cubeRenderFragmentSource = res
+                              this.http.get("shaders/cube-render-vertex.glsl", {responseType: 'text'})
+                              .subscribe(res => {
+                                this.cubeRenderVertexSource = res
+                                this.didInit = true
+                                observer.next(true)
+                              })
+                            })
                         })
                       })
                   })

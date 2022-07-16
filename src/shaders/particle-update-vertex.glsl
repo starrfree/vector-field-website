@@ -57,9 +57,9 @@ void main() {
 
   float t = clamp(length(vect) * 0.7, 0.0, 1.0);
   vec4 color = u_Color1 * t + (1.0 - t) * u_Color2;
-  if (t == 0.0) {
-    color = vec4(0.0, 0.0, 1.0, 1.0);
-  }
+  // if (t == 0.0) {
+  //   color = vec4(0.0, 0.0, 1.0, 1.0);
+  // }
   o_Color = clamp(color, 0.0, 1.0);
   gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(i_Position, 1.0);
   gl_PointSize = u_Size * 3.0 * ((u_ModelViewMatrix * vec4(i_Position, 1.0)).z + 5.0);

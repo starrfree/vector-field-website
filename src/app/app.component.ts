@@ -24,8 +24,10 @@ export class AppComponent {
     particleCount: 10000,
     normalize: false,
     speed: 1,
+    showCube: true,
+    showAxes: true,
     color1: [1, 1, 1, 1],
-    color2: [0.4, 0.4, 1, 1]
+    color2: [0.4, 0.4, 1, 1],
   }
   fullScreen: boolean = false
 

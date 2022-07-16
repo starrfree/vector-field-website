@@ -23,6 +23,8 @@ export class ToolbarComponent implements OnInit {
     particleCount: 10000,
     normalize: false,
     speed: 1,
+    showCube: true,
+    showAxes: true,
     color1: [1, 1, 1, 1],
     color2: [0.4, 0.4, 1, 1]
   }
@@ -85,6 +87,8 @@ export class ToolbarComponent implements OnInit {
           parameters.speed = Number(parameters.speed)
           parameters.lifetime = Number(parameters.lifetime)
           parameters.normalize = parameters.normalize == "true" ? true : false
+          parameters.showAxes = parameters.showAxes == "true" ? true : false
+          parameters.showCube = parameters.showCube == "true" ? true : false
           parameters.minT = Number(parameters.minT)
           parameters.maxT = Number(parameters.maxT)
           parameters.t = Number(parameters.t)

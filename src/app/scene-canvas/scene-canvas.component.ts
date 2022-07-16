@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core'
 import { Location } from '@angular/common'
 import { HttpClient } from '@angular/common/http'
-import { mat4 } from 'gl-matrix'
+import { mat4, ReadonlyVec3, vec4 } from 'gl-matrix'
 import { Observable, fromEvent } from 'rxjs'
 import { DeviceDetectorService } from 'ngx-device-detector'
 import { ShaderService } from '../shader.service'
@@ -31,9 +31,8 @@ export class SceneCanvasComponent implements OnInit {
   size: number = 1
   cubeRotation: number = 0
   cubeXRotation: number = 0
-  cubeYRotation: number = 0
-  lastCubeXRotation: number = 0
-  lastCubeYRotation: number = 0
+  cubeYRotation: number = 0//Math.PI / 8
+  frontAxis = [1, 0, 0]
 
   fpsColor = () => {
     if (this.fps > 30) {
@@ -68,6 +67,7 @@ export class SceneCanvasComponent implements OnInit {
       this.main()
     }
     this.didInit = true
+    this.addMouseMoveEvents()
   }
 
   public toogleFullScreen = (state: boolean) => {
@@ -90,6 +90,7 @@ export class SceneCanvasComponent implements OnInit {
     const updateShaderProgram = this.shaderService.initShaderProgram(gl, updateVertexShaderSource, this.shaderService.updateFragmentSource, ["o_Index", "o_Position", "o_Velocity", "o_Lifetime"])
     const renderShaderProgram = this.shaderService.initShaderProgram(gl, this.shaderService.renderVertexSource, this.shaderService.renderFragmentSource)
     const processShaderProgram = this.shaderService.initShaderProgram(gl, this.shaderService.processVertexSource, this.shaderService.processFragmentSource)
+    const cubeRenderShaderProgram = this.shaderService.initShaderProgram(gl, this.shaderService.cubeRenderVertexSource, this.shaderService.cubeRenderFragmentSource)
 
     if (!updateShaderProgram) {
       return
@@ -99,6 +100,7 @@ export class SceneCanvasComponent implements OnInit {
       updateProgram: updateShaderProgram,
       renderProgram: renderShaderProgram,
       processProgram: processShaderProgram,
+      cubeRenderProgram: cubeRenderShaderProgram,
       uniformLocations: {
         update: {
           modelMatrix: gl.getUniformLocation(updateShaderProgram, 'u_ModelViewMatrix'),
@@ -121,9 +123,16 @@ export class SceneCanvasComponent implements OnInit {
           height: gl.getUniformLocation(renderShaderProgram, 'u_Height'),
           texture: gl.getUniformLocation(renderShaderProgram, 'u_Texture')
         },
+        cubeRender: {
+          width: gl.getUniformLocation(cubeRenderShaderProgram, 'u_Width'),
+          height: gl.getUniformLocation(cubeRenderShaderProgram, 'u_Height'),
+          modelMatrix: gl.getUniformLocation(cubeRenderShaderProgram, 'u_ModelViewMatrix'),
+          projectionMatrix: gl.getUniformLocation(cubeRenderShaderProgram, 'u_ProjectionMatrix')
+        },
         process: {
           width: gl.getUniformLocation(processShaderProgram, 'u_Width'),
           height: gl.getUniformLocation(processShaderProgram, 'u_Height'),
+          noTrail: gl.getUniformLocation(processShaderProgram, 'u_NoTrail'),
           texture: gl.getUniformLocation(processShaderProgram, 'u_Texture')
         }
       },
@@ -141,7 +150,10 @@ export class SceneCanvasComponent implements OnInit {
           vertexPosition: gl.getAttribLocation(renderShaderProgram, 'i_VertexPosition')
         },
         process: {
-          vertexPosition: gl.getAttribLocation(renderShaderProgram, 'i_VertexPosition')
+          vertexPosition: gl.getAttribLocation(processShaderProgram, 'i_VertexPosition')
+        },
+        cubeRender: {
+          vertexPosition: gl.getAttribLocation(cubeRenderShaderProgram, 'i_VertexPosition')
         }
       }
     }
@@ -150,9 +162,9 @@ export class SceneCanvasComponent implements OnInit {
     var startFPS = new Date().getTime();
     var startDt = new Date().getTime();
     this.step = 0
-    this.size = 1
+    this.size = .5
     if (this.parameters.particleCount > 10000) {
-      this.size = 3.16227766017 / Math.pow(this.parameters.particleCount, 1.0/6.0)
+      this.size = 3.16227766017 / Math.pow(this.parameters.particleCount, 1.0/6.0) / 2
     }
     this.parameters.t = 0
     var render = (time: number) => {
@@ -191,10 +203,22 @@ export class SceneCanvasComponent implements OnInit {
     }
     requestAnimationFrame(render)
 
+    const resizeCanvas = () => {
+      this.canvas.nativeElement.width = 2 * this.canvas.nativeElement.clientWidth
+      this.canvas.nativeElement.height = 2 * this.canvas.nativeElement.clientHeight
+      this.textures = this.initTextures(gl, this.canvas.nativeElement.width, this.canvas.nativeElement.height)
+      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+      this.drawScene(gl, programInfo)
+    }
+    window.addEventListener('resize', resizeCanvas, false)
+    resizeCanvas()
+  }
+
+  addMouseMoveEvents() {
     const moveMouse = (event: any) => {
       this.mousePosition = [event.pageX, this.canvas.nativeElement.height - event.pageY]
-      this.cubeYRotation += event.movementX / 1000
-      this.cubeXRotation += event.movementY / 1000
+      this.cubeYRotation += event.movementX / 360
+      this.cubeXRotation += event.movementY / 360
     }
     if (this.deviceService.isMobile()) {
       console.log("Device is mobile")
@@ -208,35 +232,30 @@ export class SceneCanvasComponent implements OnInit {
       this.canvas.nativeElement.addEventListener('touchmove', (event: any) => {
         if (this.mouseIsActive) {
           moveMouse(event)
-          event.stopPropagation();
-          event.preventDefault();
         }
       }, false)
     } else {
       // this.canvas.nativeElement
-      document.addEventListener('mousedown', (event: any) => {
+      this.canvas.nativeElement.addEventListener('mousedown', (event: any) => {
         this.mouseIsActive = true
         moveMouse(event)
       }, false)
-      document.addEventListener('mouseup', (event: any) => {
+      this.canvas.nativeElement.addEventListener('mouseup', (event: any) => {
+        // transform front axis
+        // const rotateMatrix = mat4.create();
+        // mat4.rotate(rotateMatrix, rotateMatrix, this.cubeYRotation, [0, 1, 0]);
+        // var newAxis = vec4.create();
+        // vec4.transformMat4(newAxis, [1, 0, 0, 1], rotateMatrix);
+        // this.frontAxis = [newAxis[0], newAxis[1], newAxis[2]]
+        // console.log(this.frontAxis)
         this.mouseIsActive = false
       }, false)
-      document.addEventListener('mousemove', (event: any) => {
+      this.canvas.nativeElement.addEventListener('mousemove', (event: any) => {
         if (this.mouseIsActive) {
           moveMouse(event)
         }
       }, false)
     }
-
-    const resizeCanvas = () => {
-      this.canvas.nativeElement.width = 3 * this.canvas.nativeElement.clientWidth
-      this.canvas.nativeElement.height = 3 * this.canvas.nativeElement.clientHeight
-      this.textures = this.initTextures(gl, this.canvas.nativeElement.width, this.canvas.nativeElement.height)
-      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
-      this.drawScene(gl, programInfo)
-    }
-    window.addEventListener('resize', resizeCanvas, false)
-    resizeCanvas()
   }
 
   initBuffers(gl: WebGL2RenderingContext) {
@@ -276,11 +295,91 @@ export class SceneCanvasComponent implements OnInit {
     const corners = gl.createBuffer()
     gl.bindBuffer(gl.ARRAY_BUFFER, corners)
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
+    var cube = [
+      // Front face
+      -1.0, -1.0,  1.0,
+      1.0, -1.0,  1.0,
+      -1.0,  1.0,  1.0,
+      1.0,  1.0,  1.0,
+    
+      // Back face
+      -1.0, -1.0, -1.0,
+      -1.0,  1.0, -1.0,
+       1.0,  1.0, -1.0,
+       1.0, -1.0, -1.0,
+    
+      // Top face
+      -1.0,  1.0, -1.0,
+      -1.0,  1.0,  1.0,
+       1.0,  1.0,  1.0,
+       1.0,  1.0, -1.0,
+    
+      // Bottom face
+      -1.0, -1.0, -1.0,
+       1.0, -1.0, -1.0,
+       1.0, -1.0,  1.0,
+      -1.0, -1.0,  1.0,
+    
+      // Right face
+       1.0, -1.0, -1.0,
+       1.0,  1.0, -1.0,
+       1.0,  1.0,  1.0,
+       1.0, -1.0,  1.0,
+    
+      // Left face
+      -1.0, -1.0, -1.0,
+      -1.0, -1.0,  1.0,
+      -1.0,  1.0,  1.0,
+      -1.0,  1.0, -1.0,
+
+      // Connects
+      1, -1, -1,
+      1, -1, 1,
+      -1, 1, 1,
+      -1, -1, 1,
+      -1, 1, -1,
+      1, 1, -1,
+    ]
+    var axes =  [
+      -1, -1, -1,
+      -1, 1.2, -1,
+      -1, 1.2, -1,
+      -0.97, 1.14, -1.03,
+      -1, 1.2, -1,
+      -1.03, 1.14, -0.97,
+
+      -1, -1, -1,
+      -1, -1, 1.2,
+      -1, -1, 1.2,
+      -0.97, -1.03, 1.14,
+      -1, -1, 1.2,
+      -1.03, -0.97, 1.14,
+
+      -1, -1, -1,
+      1.2, -1, -1,
+      1.2, -1, -1,
+      1.14, -0.97, -1.03,
+      1.2, -1, -1,
+      1.14, -1.03, -0.97,
+    ]
+    positions = []
+    if (this.parameters.showCube) {
+      positions.push(...cube)
+    }
+    if (this.parameters.showAxes) {
+      positions.push(...axes)
+    }
+    const vertices = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertices)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
+
     gl.bindBuffer(gl.ARRAY_BUFFER, null)
+
     return {
       input: input,
       output: output,
-      corners: corners
+      corners: corners,
+      cubeVertices: vertices
     }
   }
 
@@ -335,11 +434,11 @@ export class SceneCanvasComponent implements OnInit {
       mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
 
       const modelViewMatrix = mat4.create();
-      mat4.translate(modelViewMatrix, modelViewMatrix, [-0.0, 0.0, -4.0]);
+      mat4.translate(modelViewMatrix, modelViewMatrix, [0.0, 0.0, -4.0]);
       // mat4.rotate(modelViewMatrix, modelViewMatrix, Math.PI / 6, [0, 1, 0]);
       // mat4.rotate(modelViewMatrix, modelViewMatrix, .0 * this.cubeRotation, [0, 0, 1]);
       mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeYRotation, [0, 1, 0]);
-      mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeXRotation, [1, 0, 0]);
+      mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeXRotation, [this.frontAxis[0], this.frontAxis[1], this.frontAxis[2]]);
 
       gl.useProgram(programInfo.updateProgram)
       gl.uniformMatrix4fv(programInfo.uniformLocations.update.modelMatrix, false, modelViewMatrix)
@@ -393,13 +492,48 @@ export class SceneCanvasComponent implements OnInit {
           offset)
         gl.enableVertexAttribArray(programInfo.attribLocations.process.vertexPosition)
       }
-      gl.bindFramebuffer(gl.FRAMEBUFFER, this.textures.frameBuffers[(this.textureOffset + 1) % 2]);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.textures.frameBuffers[(this.textureOffset + 1) % 2])
       gl.bindTexture(gl.TEXTURE_2D, this.textures.textures[(this.textureOffset) % 2]);
       gl.uniform1f(programInfo.uniformLocations.process.width, gl.canvas.width)
       gl.uniform1f(programInfo.uniformLocations.process.height, gl.canvas.height)
+      gl.uniform1i(programInfo.uniformLocations.process.noTrail, this.mouseIsActive ? 1 : 0)
       gl.uniform1i(programInfo.uniformLocations.process.texture, 0);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-      
+
+      if (this.parameters.showCube || this.parameters.showAxes) {
+        gl.useProgram(programInfo.cubeRenderProgram)
+        { 
+          const numComponents = 3
+          const type = gl.FLOAT
+          const normalize = false
+          const stride = 0
+          const offset = 0
+          gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.cubeVertices)
+          gl.vertexAttribPointer(
+            programInfo.attribLocations.cubeRender.vertexPosition,
+            numComponents,
+            type,
+            normalize,
+            stride,
+            offset)
+          gl.enableVertexAttribArray(programInfo.attribLocations.cubeRender.vertexPosition)
+        }
+        gl.uniform1f(programInfo.uniformLocations.cubeRender.width, gl.canvas.width)
+        gl.uniform1f(programInfo.uniformLocations.cubeRender.height, gl.canvas.height)
+        gl.uniformMatrix4fv(programInfo.uniformLocations.cubeRender.modelMatrix, false, modelViewMatrix)
+        gl.uniformMatrix4fv(programInfo.uniformLocations.cubeRender.projectionMatrix, false, projectionMatrix)
+        gl.bindTexture(gl.TEXTURE_2D, this.textures.textures[(this.textureOffset) % 2]);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.textures.frameBuffers[(this.textureOffset + 1) % 2])
+        var count: number = 0
+        if (this.parameters.showAxes) {
+          count += 18
+        }
+        if (this.parameters.showCube) {
+          count += 30
+        }
+        gl.drawArrays(gl.LINES, 0, count)
+      }
+
       gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
       gl.useProgram(programInfo.renderProgram)

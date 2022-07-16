@@ -78,6 +78,18 @@
     </div>
   </div>
   <div class="divider field-divider"></div>
+  <div class="field-container checkbox-field">
+    <div class="checkbox-container">
+      <input #normalize type="checkbox" [ngModel]="parameters.showAxes" (ngModelChange)="parameters.showAxes = $event; parametersChange.emit(parameters); changeURL()" (keydown.enter)="blur()">
+      <label for="normalize" class="after-label">Show axes</label>
+    </div>
+  </div>
+  <div class="field-container checkbox-field">
+    <div class="checkbox-container">
+      <input #normalize type="checkbox" [ngModel]="parameters.showCube" (ngModelChange)="parameters.showCube = $event; parametersChange.emit(parameters); changeURL()" (keydown.enter)="blur()">
+      <label for="normalize" class="after-label">Show limits</label>
+    </div>
+  </div>
   <div id="slow-field" class="field-container color-picker">
     <label for="c2" class="before-label">Slow</label>
     <div class="cp_wrapper">

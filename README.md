@@ -3,9 +3,9 @@ Simulate thousands of particles to visualize vector fields.
 The particles move along the vector field: at every time step `dt` the particles move by `dx` on the x-axis and `dy` on the y-axis.
 They are simulated using __WebGL__ therefore the simulation runs on the GPU.
 
-## dx, dy
-Functions of `x`, `y` and `t`.
-Define the elementary movement of a particle given its `x, y` coordinates and time `t`.
+## dx, dy, dz
+Functions of `x`, `y`, `z` and `t`.
+Define the elementary movement of a particle given its `x, y, z` coordinates and time `t`.
 These are set by the user using the corresponding fields.
 One can use basic operations like `+`, `-`, `*`, `/` as well as elementary functions such as `cos`, `sin`, `tan`, `exp`, `pow(_, _)`, `sqrt`, etc.
 
@@ -22,6 +22,10 @@ Ranges from left to right. The default left value is `-1`. The default right val
 Variable: `y`.
 Ranges from bottom to top. The default bottom value is `-1`. The default top value is `1`.
 
+## z
+Variable: `z`.
+Ranges from back to front. The default back value is `-1`. The default front value is `1`.
+
 ## Particles
 Slider that controls the number of particles in the simulation.
 
@@ -33,6 +37,12 @@ Slider that controls the time (number of frames) that particles live.
 
 ## Normalize
 Checkbox controlling whether all particles move at the same speed, by normalizing their velocity.
+
+## Show axes
+Checkbox controlling whether to show the axes in the 3D environment.
+
+## Show limits
+Checkbox controlling whether to show the cube that indicates the boundaries of the simulation.
 
 ## Slow
 Color picker that controls the color of slower particles. Default is #6666ff

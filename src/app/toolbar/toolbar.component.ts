@@ -102,8 +102,8 @@ export class ToolbarComponent implements OnInit {
   }
 
   open2D() {
-    // window.location.href = 'https://vectorfield-dot-starfree.ew.r.appspot.com'
-    window.location.href = 'http://localhost:4200'
+    window.location.href = 'https://vectorfield-dot-starfree.ew.r.appspot.com'
+    // window.location.href = 'http://localhost:4200'
   }
 
   goToRoot() {

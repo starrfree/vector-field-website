@@ -1,4 +1,4 @@
-service: vectorfield
+service: vectorfield3d
 runtime: nodejs16
 
 handlers:

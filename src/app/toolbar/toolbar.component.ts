@@ -87,8 +87,8 @@ export class ToolbarComponent implements OnInit {
           parameters.speed = Number(parameters.speed)
           parameters.lifetime = Number(parameters.lifetime)
           parameters.normalize = parameters.normalize == "true" ? true : false
-          parameters.showAxes = parameters.showAxes == "true" ? true : false
-          parameters.showCube = parameters.showCube == "true" ? true : false
+          parameters.showAxes = parameters.showAxes == "false" ? false : true
+          parameters.showCube = parameters.showCube == "false" ? false : true
           parameters.minT = Number(parameters.minT)
           parameters.maxT = Number(parameters.maxT)
           parameters.t = Number(parameters.t)
@@ -99,6 +99,10 @@ export class ToolbarComponent implements OnInit {
         }
       })
     })
+  }
+
+  open2D() {
+    window.location.href = 'https://vectorfield-dot-starfree.ew.r.appspot.com'
   }
 
   goToRoot() {

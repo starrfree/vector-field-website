@@ -262,6 +262,44 @@ input[type="checkbox"]:checked::before {
   color: gray;
   position: absolute;
   bottom: 10px;
-  top: 740px;
+  top: 780px;
   margin-left: 10px;
 }
+
+#D2 {
+  border-radius: 7px 0 0 7px;
+}
+
+#D3 {
+  border-radius: 0 7px 7px 0;
+}
+
+.dimension-toggle {
+  margin: auto;
+  display: inline-block;
+  width: 110px;
+  padding: 4px 0;
+  text-align: center;
+}
+
+.dimension-toggle:hover {
+  /* border-color: #666 !important; */
+  text-decoration: underline;
+  text-underline-offset: 1px;
+}
+
+.dimension-container {
+  margin-left: 17px;
+  cursor: pointer;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+

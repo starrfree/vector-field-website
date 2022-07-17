@@ -30,10 +30,12 @@ export class SceneCanvasComponent implements OnInit {
   step: number = 0
   size: number = 1
   cubeRotation: number = 0
-  cubeXRotation: number = 0
-  cubeYRotation: number = Math.PI / 9
+  cubeXRotation: number = 0.3
+  cubeYRotation: number = -0.15
 
-  fpsColor = () => {
+  xPosition: [number, number] = [0, 0]
+
+  get fpsColor() {
     if (this.fps > 30) {
       return "lightgreen"
     } else if (this.fps >= 24) {
@@ -72,6 +74,19 @@ export class SceneCanvasComponent implements OnInit {
   public toogleFullScreen = (state: boolean) => {
     this.canvasWidthOffset = state ? '0px' : '270px'
     setTimeout(() => this.initialize(), 310)
+  }
+
+  setXPosition() {
+    var pos = vec4.clone([1, -1, -1, 1]);
+    const matrices = this.getMatrices(this.shaderService.gl)
+    vec4.transformMat4(pos, pos, matrices.projection)
+    vec4.transformMat4(pos, pos, matrices.model)
+    pos[0] /= pos[2];
+    pos[1] /= pos[2];
+    // pos = [0.9, -0.9, 0, 1]
+    var screenPos: [number, number] = [(pos[0] * 0.5 + 0.5) * this.canvas.nativeElement.clientWidth, (pos[1] * -0.5 + 0.5) * this.canvas.nativeElement.clientHeight]
+    this.xPosition = [Math.floor(screenPos[0]), Math.floor(screenPos[1])]
+    // console.log([pos[0], pos[1], pos[2], pos[3]])
   }
 
   main(): void {
@@ -211,6 +226,7 @@ export class SceneCanvasComponent implements OnInit {
     }
     window.addEventListener('resize', resizeCanvas, false)
     resizeCanvas()
+    this.setXPosition()
   }
 
   addMouseMoveEvents() {
@@ -218,8 +234,7 @@ export class SceneCanvasComponent implements OnInit {
       this.mousePosition = [event.pageX, this.canvas.nativeElement.height - event.pageY]
       this.cubeYRotation += event.movementX / 360
       this.cubeXRotation += event.movementY / 360
-      // mat4.rotate(this.rotationMatrix, this.rotationMatrix, event.movementX / 360, [0, 1, 0])
-      // mat4.rotate(this.rotationMatrix, this.rotationMatrix, event.movementY / 360, [1, 0, 0])
+      this.setXPosition()
     }
     if (this.deviceService.isMobile()) {
       console.log("Device is mobile")
@@ -412,6 +427,41 @@ export class SceneCanvasComponent implements OnInit {
     }
   }
 
+  getMatrices(gl: WebGL2RenderingContext) {
+    const fieldOfView = 45 * Math.PI / 180;   // in radians
+    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    const zNear = 0.1;
+    const zFar = 100.0;
+    var projectionMatrix = mat4.create();
+    mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
+
+    var modelViewMatrix = mat4.create();
+    mat4.translate(modelViewMatrix, modelViewMatrix, [0.0, 0.0, -4.0]);
+    // mat4.rotate(modelViewMatrix, modelViewMatrix, Math.PI / 6, [0, 1, 0]);
+    // mat4.rotate(modelViewMatrix, modelViewMatrix, .0 * this.cubeRotation, [0, 0, 1]);
+    
+    // var yAxis = vec4.clone([0, 1, 0, 1]);
+    // {
+    //   var rotationMatrix = mat4.create();
+    //   mat4.rotate(rotationMatrix, rotationMatrix, this.cubeXRotation, [-1, 0, 0]);
+    //   vec4.transformMat4(yAxis, yAxis, rotationMatrix)
+    // }
+    // mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeYRotation, [yAxis[0], yAxis[1], yAxis[2]]);
+
+    var xAxis = vec4.clone([1, 0, 0, 1]);
+    {
+      var rotationMatrix = mat4.create();
+      mat4.rotate(rotationMatrix, rotationMatrix, this.cubeYRotation, [0, -1, 0]);
+      vec4.transformMat4(xAxis, xAxis, rotationMatrix)
+    }
+    mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeYRotation, [0, 1, 0]);
+    mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeXRotation, [xAxis[0], xAxis[1], xAxis[2]]);
+    return {
+      projection: projectionMatrix,
+      model: modelViewMatrix
+    }
+  }
+
   drawScene(gl: WebGL2RenderingContext, programInfo: any, iterations: number = 1) {
     for (let i = 0; i < iterations; i++) {
       gl.clearColor(0.0, 0.0, 0.0, 1.0)
@@ -420,35 +470,9 @@ export class SceneCanvasComponent implements OnInit {
       gl.depthFunc(gl.LEQUAL)
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-      const fieldOfView = 45 * Math.PI / 180;   // in radians
-      const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-      const zNear = 0.1;
-      const zFar = 100.0;
-      const projectionMatrix = mat4.create();
-      mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
-
-      var modelViewMatrix = mat4.create();
-      mat4.translate(modelViewMatrix, modelViewMatrix, [0.0, 0.0, -4.0]);
-      // mat4.rotate(modelViewMatrix, modelViewMatrix, Math.PI / 6, [0, 1, 0]);
-      // mat4.rotate(modelViewMatrix, modelViewMatrix, .0 * this.cubeRotation, [0, 0, 1]);
-      
-      // var yAxis = vec4.clone([0, 1, 0, 1]);
-      // {
-      //   var rotationMatrix = mat4.create();
-      //   mat4.rotate(rotationMatrix, rotationMatrix, this.cubeXRotation, [-1, 0, 0]);
-      //   vec4.transformMat4(yAxis, yAxis, rotationMatrix)
-      // }
-      // mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeYRotation, [yAxis[0], yAxis[1], yAxis[2]]);
-
-      var xAxis = vec4.clone([1, 0, 0, 1]);
-      {
-        var rotationMatrix = mat4.create();
-        mat4.rotate(rotationMatrix, rotationMatrix, this.cubeYRotation, [0, -1, 0]);
-        vec4.transformMat4(xAxis, xAxis, rotationMatrix)
-      }
-      mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeYRotation, [0, 1, 0]);
-      mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeXRotation, [xAxis[0], xAxis[1], xAxis[2]]);
-
+      var matrices = this.getMatrices(gl)
+      var projectionMatrix = matrices.projection
+      var modelViewMatrix = matrices.model
 
       gl.useProgram(programInfo.updateProgram)
       gl.uniformMatrix4fv(programInfo.uniformLocations.update.modelMatrix, false, modelViewMatrix)

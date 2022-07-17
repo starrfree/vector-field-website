@@ -229,11 +229,28 @@ export class SceneCanvasComponent implements OnInit {
     this.setXPosition()
   }
 
+  previousTouch: any;
   addMouseMoveEvents() {
     const moveMouse = (event: any) => {
-      this.mousePosition = [event.pageX, this.canvas.nativeElement.height - event.pageY]
-      this.cubeYRotation += event.movementX / 360
-      this.cubeXRotation += event.movementY / 360
+      var x = event.movementX
+      var y = event.movementY
+      if (this.deviceService.isMobile()) {
+        const touch = event.touches[0]
+        if (this.previousTouch) {
+          // be aware that these only store the movement of the first touch in the touches array
+          x = touch.pageX - this.previousTouch.pageX
+          y = touch.pageY - this.previousTouch.pageY
+          event.stopPropagation()
+          event.preventDefault()
+        } else {
+          x = 0
+          y = 0
+        }
+        this.previousTouch = touch
+      }
+      // this.mousePosition = [event.pageX, this.canvas.nativeElement.height - event.pageY]
+      this.cubeYRotation += x / 360
+      this.cubeXRotation += y / 360
       this.setXPosition()
     }
     if (this.deviceService.isMobile()) {
@@ -243,6 +260,7 @@ export class SceneCanvasComponent implements OnInit {
         moveMouse(event)
       }, false)
       this.canvas.nativeElement.addEventListener('touchend', (event: any) => {
+        this.previousTouch = event.touches[0]
         this.mouseIsActive = false
       }, false)
       this.canvas.nativeElement.addEventListener('touchmove', (event: any) => {

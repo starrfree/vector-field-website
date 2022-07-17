@@ -92,6 +92,10 @@ export class ToolbarComponent implements OnInit {
     })
   }
 
+  open3D() {
+    window.location.href = 'https://vectorfield3d-dot-starfree.ew.r.appspot.com'
+  }
+
   goToRoot() {
     this.router.navigate(['/'])
   }

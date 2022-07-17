@@ -2,6 +2,14 @@
   <div class="title">
     <a href="/" class="title-a">Vector Field</a>
   </div>
+  <div class="field-group dimension-container">
+    <div class="dimension-toggle noselect" id="D2" [style.background-color]="'rgb(76, 76, 76)'" [style.border]="'1px solid #888'">
+      2D
+    </div>
+    <div class="dimension-toggle noselect" id="D3" [style.background-color]="'#333'" [style.border]="'1px solid #111'" (click)="open3D()">
+      3D
+    </div>
+  </div>
   <div class="field-group">
     <div class="field-container">
       <span class="before-field">dx</span>

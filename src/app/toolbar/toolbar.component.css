@@ -257,7 +257,7 @@ input[type="checkbox"]:checked::before {
   color: gray;
   position: absolute;
   bottom: 10px;
-  top: 580px;
+  top: 620px;
   margin-left: 10px;
 }
 

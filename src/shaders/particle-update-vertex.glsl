@@ -62,7 +62,7 @@ void main() {
   // }
   o_Color = clamp(color, 0.0, 1.0);
   gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(i_Position, 1.0);
-  gl_PointSize = u_Size * 3.0 * ((u_ModelViewMatrix * vec4(i_Position, 1.0)).z + 5.0);
+  gl_PointSize = clamp(u_Size * 3.0 * ((u_ModelViewMatrix * vec4(i_Position, 1.0)).z + 5.0), 0.0, 4.0);
 }
 
 // float rand(vec2 xy, float seed) {

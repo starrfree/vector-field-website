@@ -30,8 +30,8 @@ export class SceneCanvasComponent implements OnInit {
   step: number = 0
   size: number = 1
   cubeRotation: number = 0
-  cubeXRotation: number = 0.3
-  cubeYRotation: number = -0.15
+  cubeXRotation: number = 0.4//0.3
+  cubeYRotation: number = -0.4//-0.15
 
   xPosition: [number, number] = [0, 0]
 
@@ -275,6 +275,8 @@ export class SceneCanvasComponent implements OnInit {
         moveMouse(event)
       }, false)
       this.canvas.nativeElement.addEventListener('mouseup', (event: any) => {
+        console.log(this.cubeXRotation)
+        console.log(this.cubeYRotation)
         this.mouseIsActive = false
       }, false)
       this.canvas.nativeElement.addEventListener('mousemove', (event: any) => {
@@ -368,6 +370,7 @@ export class SceneCanvasComponent implements OnInit {
       1, 1, -1,
     ]
     var axes =  [
+      // y
       -1, -1, -1,
       -1, 1.2, -1,
       -1, 1.2, -1,
@@ -375,6 +378,7 @@ export class SceneCanvasComponent implements OnInit {
       -1, 1.2, -1,
       -1.03, 1.14, -0.97,
 
+      // z
       -1, -1, -1,
       -1, -1, 1.2,
       -1, -1, 1.2,
@@ -382,12 +386,34 @@ export class SceneCanvasComponent implements OnInit {
       -1, -1, 1.2,
       -1.03, -0.97, 1.14,
 
+      // x
       -1, -1, -1,
       1.2, -1, -1,
       1.2, -1, -1,
       1.14, -0.97, -1.03,
       1.2, -1, -1,
       1.14, -1.03, -0.97,
+
+      // labels
+      // x
+      1.3, -0.89, -1,
+      1.25, -0.97, -1,
+      1.25, -0.89, -1,
+      1.3, -0.97, -1,
+
+      // y
+      -0.98, 1.31, -1.02,
+      -1.02, 1.24, -0.98,
+      -1.02, 1.31, -0.98,
+      -1, 1.275, -1,
+
+      // z
+      -1, -0.94, 1.32,
+      -1, -0.86, 1.26,
+      -1, -0.94, 1.32,
+      -1, -0.94, 1.26,
+      -1, -0.86, 1.26,
+      -1, -0.86, 1.32,
     ]
     positions = []
     if (this.parameters.showCube) {
@@ -581,7 +607,7 @@ export class SceneCanvasComponent implements OnInit {
           count += 18
         }
         if (this.parameters.showCube) {
-          count += 30
+          count += 44
         }
         gl.drawArrays(gl.LINES, 0, count)
       }

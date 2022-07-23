@@ -1,0 +1,165 @@
+<div class="all-container">
+  <div class="container">
+    <h1>Visualiser les équations différencielles</h1>
+    <h2 class="subtitle">avec <a class="subtitle" href="https://vectorfield-dot-starfree.ew.r.appspot.com">Vector Field</a></h2>
+    <h2>
+      Equations à une dimension
+    </h2>
+    <p>
+      On s'intéresse aux équations différencielles de la forme <span class="equation">$${{diff1D}}$$</span>
+      où \(y\) est la fonction que l'on cherche, c'est une fonction d'une seule variable \(x\).<br>
+      \(f\) est une fonction de deux variables: \(x\), et \(y\) évaluée en \(x\). Elle contraint la valeur de la dérivée \(y'\) en tout point.
+    </p>
+    <p>
+      On cherche à résoudre cette équation, c'est à dire trouver toutes les fonctions ayant pour dérivée \(f\). Cependant, on ne sait souvent pas résoudre
+      ces équations, on va alors chercher à tracer une approximation des solutions pour les visualiser. 
+    </p>
+    <h3>
+      Comment visualiser ?
+    </h3>
+    <p>
+      Pour visualiser une équation différencielles de la forme vue précédemment, il suffit de fixer la valeur \(dx = 1\), et pour \(dy\) écrire \(dy = f(x, y(x))\).
+      Les particules suivront alors le tracé des fonctions solutions.<br>
+      Nous allons voir plus tard pourquoi cela marche.
+    </p>
+  </div>
+  <h3>
+    Example: \(y' = x\)
+  </h3>
+  <div class="indent">
+    <a  target="_blank" rel="noopener noreferrer" href="https://vectorfield-dot-starfree.ew.r.appspot.com/?x=1&y=x&t=0&minT=0&maxT=10&xRange=-2&xRange=2&yRange=-2&yRange=2&lifetime=100&particleCount=10000&normalize=false&speed=1&color1=1&color1=1&color1=1&color1=1&color2=0.4&color2=0.4&color2=1&color2=1">
+      <img class="example-img" src="../../assets/images/e1.png">
+    </a>
+    <span class="footnote center-align">click on images to open the simulation in a new tab</span>
+  </div>
+  <div class="container">
+    <p>
+      Comme nous savons résoudre l'équation différencielle \(y' = x\), on peut tester la méthode de visualisation vue plus tôt. 
+      En effet, toutes les solutions sont les fonctions de la forme $${{solx}}$$ où \(c\) est n'importe quel nombre réel, fixé pour une fonction donnée.
+      <br>De cette formule, on déduit que les solutions forment des paraboles dont la hauteur dépend de la valeur de \(c\).
+      <br>Et c'est exactement ce que l'on observe dans
+      la simulation ! On voit que les particules suivent des paraboles de hauteur différente.
+    </p>
+    <h3>
+      Pourqoi cette méthode marche-t-elle ?
+    </h3>
+    <p>
+      En tout point, on peut écrire la dérivée commme \(y'={{der}}\)
+      <br>où \(dx\) est un déplacement élémentaire horizontal et \(dy\) est 
+      le déplacement élémentaire de la fonction correspondant à \(dx\).
+    </p>
+    <p>
+      Pour que le calcul de la dérivée soit exact, il faudrait faire tendre \(dx\) vers \(0\).
+      Mais pour faire une approximation de la dérivée, on peut fixer la valeur de \(dx\), par exemple à \(1\), on a alors \({{der}} = dy\).
+      <br>Or, ce que l'on cherche à avoir, en tout point de la trajectoire des particules, est que \({{diff1D}}\).
+      <br>Donc en forçant \(dy\) à avoir \(f(x, y(x)))\) comme expression,
+      et en fixant \(dx = 1\), on s'assure que les particules aient comme trajectoire une solution à l'équation différencielles.
+    </p>
+  </div>
+  <h3>
+    Example: \(y' = \cos(3 x) \cdot \sin(2 x y + 1)\)
+  </h3>
+  <div class="indent">
+    <a  target="_blank" rel="noopener noreferrer" href="https://vectorfield-dot-starfree.ew.r.appspot.com/?x=1&y=cos(3%20*%20x)%20*%20sin(2%20*%20y%20*%20x%20%2B%201)&t=0&minT=0&maxT=10&xRange=-4&xRange=4&yRange=-4&yRange=4&lifetime=100&particleCount=10000&normalize=false&speed=1&color1=1&color1=1&color1=1&color1=1&color2=0.4&color2=0.4&color2=1&color2=1">
+      <img class="example-img" src="../../assets/images/e2.png">
+    </a>
+    <span class="footnote center-align">click on images to open the simulation in a new tab</span>
+  </div>
+  <div class="container">
+    <p>
+      Grâce à cette méthode, on peut visualiser les solutions à des équations différencielles qui seraient trop compliquées pour être résolues analytiquement.
+    </p>
+  </div>
+  <div class="container">
+    <h2>
+      Equations à deux et trois dimensions
+    </h2>
+    <p>
+      On s'intéresse maintenant aux systèmes d'équations différencielles de la forme <span class="equation">$${{diff2D}}$$</span>
+      où \(x\) et \(y\) sont les fonctions, d'une variable \(t\), que l'on cherches.<br>\({{f1}}\), \({{f2}}\) sont des fonctions de trois variables: \(t\), \(x(t)\), \(y(t)\).
+    </p>
+    <p>
+      Il faut noter que la variable de base est ici \(t\), alors que dans le cas à 1D, la variable était \(x\).
+    </p>
+    <h3>
+      Ecriture vectorielle
+    </h3>
+    <p>
+      On peut aussi écrire le système différemment: de manière vectorielle. En posant le vecteur \({{xyVector}}\), on se réduit au cas à une variable.
+      Le système devient alors: <span class="equation">$${{diff2DVect}}$$</span> où \(f\) est une fonction de deux variables: \(t\) et \({{xy_tVector}}\) qui est un vecteur.
+      <br>Ce problème est donc très similaire au cas 1D.
+    </p>
+    <h3>
+      Comment visualiser ?
+    </h3>
+    <p>
+      Pour visualiser un système d'équations différencielle, on écrit simplement pour \(dx\) l'expression de \(x'\), et pour \(dy\) l'expression de \(y'\).
+      La position \((x, y)\) de chaque particule au court du temps décrira alors une solution au système.
+      Nous allons expliquer plus tard pourquoi cela marche.
+    </p>
+  </div>
+  <h3>
+    Example: \({{ex12D}}\)
+  </h3>
+  <div class="indent">
+    <a  target="_blank" rel="noopener noreferrer" href="https://vectorfield-dot-starfree.ew.r.appspot.com/?x=y&y=-x&t=0&minT=0&maxT=10&xRange=-1&xRange=1&yRange=-1&yRange=1&lifetime=100&particleCount=10000&normalize=false&speed=1&color1=1&color1=1&color1=1&color1=1&color2=0.4&color2=0.4&color2=1&color2=1">
+      <img class="example-img" src="../../assets/images/e3.png">
+    </a>
+    <span class="footnote center-align">click on images to open the simulation in a new tab</span>
+  </div>
+  <div class="container">
+    <p>
+      On peut montrer que les solutions à ce système d'équations différencielles sont des cercles concentriques de différents rayons, qui dépendent des conditions initiales.
+      <br>C'est, encore une fois, exactement ce que l'on voit sur la simulation: les particules tournent autour du centre en décrivant des cercles.
+    </p>
+    <h3>
+      Pourqoi cette méthode marche-t-elle ?
+    </h3>
+    <p>
+      Le pas de temps \(dt\) entre chaque déplacement de la particule est fixé. 
+      <br>Or, comme pour le cas à 1D, la dérivée des fonctions peut s'écrire \(x' = {{derxt}}\) et \(y' = {{deryt}}\).
+      <br>Donc en écrivant \({{diffd2D}}\), on s'assure, comme pour le cas 1D, que les particules suivent des solutions au système d'équations différencielles.
+    </p>
+    <p>
+      L'interprétation n'est cependant pas tout à fait la même que le cas 1D. La variable de base n'est plus la coordonnée \(x\) mais c'est le temps \(t\).
+      De ce fait, le simple tracé des particules n'est plus suffisant pour comprendre l'équation, il faut aussi prendre en compte le mouvement des particules
+      dans le temps. Nottament, la vitesse des particules nous renseigne sur les propriétés des solutions.
+    </p>
+  </div>
+  <h3>
+    Example: \({{ex22D}}\)
+  </h3>
+  <div class="indent">
+    <a  target="_blank" rel="noopener noreferrer" href="https://vectorfield-dot-starfree.ew.r.appspot.com/?x=x*y%20-%20y*y&y=-cos(3*x%20%2By)&t=0&minT=0&maxT=10&xRange=-1&xRange=1&yRange=-1&yRange=1&lifetime=100&particleCount=10000&normalize=false&speed=1&color1=1&color1=1&color1=1&color1=1&color2=0.4&color2=0.4&color2=1&color2=1">
+      <img class="example-img" src="../../assets/images/e4.png">
+    </a>
+    <span class="footnote center-align">click on images to open the simulation in a new tab</span>
+  </div>
+  <div class="container">
+    <p>
+      Résoudre ce système serait trop compliqué. Mais on peut tout de même en visualiser les solutions.
+    </p>
+    <h3>
+      Maintenant, en 3D
+    </h3>
+    <p>
+      Pour les système à 3D, cela marche exactement de la même manière que pour le cas à 2D.
+      <br>Poser le vecteur \({{xyzVector}}\) permet de mettre en évidence le fait que le système se résoud de la même manière que le cas 1D.
+      <br>Ensuite pour visualiser le système il suffit d'écrire les expressions respectives de \(x'\), \(y'\), \(z'\) dans \(dx\), \(dy\), \(dz\).
+    </p>
+  </div>
+  <h3>
+    Example: \({{ex13D}}\)
+  </h3>
+  <div class="indent">
+    <a  target="_blank" rel="noopener noreferrer" href="https://vectorfield3d-dot-starfree.ew.r.appspot.com/?x=x*x-y*y&y=2*x*y*z&z=-cos(x%20%2B%20x)&t=0&minT=0&maxT=10&xRange=-1&xRange=1&yRange=-1&yRange=1&zRange=-1&zRange=1&lifetime=100&particleCount=10000&normalize=false&speed=1&showCube=true&showAxes=true&color1=1&color1=1&color1=1&color1=1&color2=0.4&color2=0.4&color2=1&color2=1">
+      <img class="example-img" src="../../assets/images/e5.png">
+    </a>
+    <span class="footnote center-align">click on images to open the simulation in a new tab</span>
+  </div>
+  <div class="container">
+    <p>
+      La vue en 3D permet de visualiser les solutions à un système de trois équations différencielles, qui seraient difficile à appréhender autrement.
+    </p>
+  </div>
+</div>

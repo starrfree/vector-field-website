@@ -9,13 +9,17 @@ import { SceneCanvasComponent } from './scene-canvas/scene-canvas.component';
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { FormsModule } from '@angular/forms';
 import { AnimatedSliderComponent } from './animated-slider/animated-slider.component';
+import { EquaDiffComponent } from './equa-diff/equa-diff.component';
+import { VectorfieldComponent } from './vectorfield/vectorfield.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     SceneCanvasComponent,
     ToolbarComponent,
-    AnimatedSliderComponent
+    AnimatedSliderComponent,
+    EquaDiffComponent,
+    VectorfieldComponent
   ],
   imports: [
     BrowserModule,

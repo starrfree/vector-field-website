@@ -1,0 +1,54 @@
+::ng-deep body {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.subtitle {
+  color: #aaa;
+  margin-top: -10px;
+  margin-bottom: 40px;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 0.1px;
+}
+
+.equation {
+  font-size: large;
+}
+
+p {
+  font-size: 17px;
+}
+
+.container {
+  max-width: 800px;
+  line-height: 27px;
+}
+
+.example-img {
+  max-width: calc(min(700px, 100%));
+  max-height: calc(min(500px, 100%));
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid #555;
+}
+
+.footnote {
+  display: block;
+  font-size: 13px;
+  color: #999
+}
+
+.center-align {
+  text-align: center;
+  width: 100%;
+}
+
+.indent {
+  max-width: 800px;
+  margin-left: 40px;
+}
+
+.all-container {
+  margin-bottom: 300px;
+}

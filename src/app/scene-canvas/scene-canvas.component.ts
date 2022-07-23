@@ -275,8 +275,6 @@ export class SceneCanvasComponent implements OnInit {
         moveMouse(event)
       }, false)
       this.canvas.nativeElement.addEventListener('mouseup', (event: any) => {
-        console.log(this.cubeXRotation)
-        console.log(this.cubeYRotation)
         this.mouseIsActive = false
       }, false)
       this.canvas.nativeElement.addEventListener('mousemove', (event: any) => {

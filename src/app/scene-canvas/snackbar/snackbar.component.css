@@ -1,6 +1,9 @@
 .click-button {
   padding: 0 6px;
   margin: 0 5px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 0.1px;
 }
 
 .horizontal {
@@ -9,4 +12,15 @@
 
 .container {
   margin-bottom: -8px;
+}
+
+.action-button {
+  padding: 0;
+  min-width: 35px;
+  /* width: 30px;
+  height: 30px; */
+}
+
+.action {
+  margin-top: 3px;
 }

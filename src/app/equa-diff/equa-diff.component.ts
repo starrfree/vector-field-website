@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+declare var MathJax: any;
 
 @Component({
   selector: 'app-equa-diff',
@@ -6,6 +7,17 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./equa-diff.component.css']
 })
 export class EquaDiffComponent implements OnInit {
+  private _language : "fr" | "en" = "en";
+  public get language() : "fr" | "en" {
+    return this._language;
+  }
+  public set language(v : "fr" | "en") {
+    this._language = v;
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+  }
+  
+  
   diff1D = "y'=f(x, y(x))"
   diff2D = `
     \\begin{cases}
@@ -80,6 +92,8 @@ export class EquaDiffComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
   }
 
   delareFunction(name: string, from: string, to: string, variables: string, f: string) {

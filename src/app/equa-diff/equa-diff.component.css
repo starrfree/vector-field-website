@@ -52,3 +52,19 @@ p {
 .all-container {
   margin-bottom: 300px;
 }
+
+.language-select-container {
+  padding-top: 10px;
+}
+
+.language-select-container select {
+  border-radius: 5px;
+  background-color: #555;
+  color: white;
+  padding: 4px 3px;
+}
+
+.language-select-container span {
+  margin-right: 10px;
+  font-weight: 700;
+}

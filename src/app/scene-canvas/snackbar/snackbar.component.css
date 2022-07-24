@@ -1,0 +1,12 @@
+.click-button {
+  padding: 0 6px;
+  margin: 0 5px;
+}
+
+.horizontal {
+  display: inline-flex;
+}
+
+.container {
+  margin-bottom: -8px;
+}

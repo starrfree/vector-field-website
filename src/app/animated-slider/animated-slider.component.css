@@ -24,6 +24,10 @@
   border-radius: 100% 5px 5px 100%;
 }
 
+/* .indicator:hover {
+  padding: 3px 5px 4px 10px;
+} */
+
 .vertical-center {
   margin: 0;
   position: absolute;

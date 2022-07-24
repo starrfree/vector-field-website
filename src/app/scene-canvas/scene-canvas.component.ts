@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core'
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, Inject } from '@angular/core'
 import { Location } from '@angular/common'
 import { HttpClient } from '@angular/common/http'
 import { mat4 } from 'gl-matrix'
@@ -6,11 +6,15 @@ import { Observable, fromEvent } from 'rxjs'
 import { DeviceDetectorService } from 'ngx-device-detector'
 import { ShaderService } from '../shader.service'
 import { ActivatedRoute, Router } from '@angular/router'
+import { MatSnackBar } from '@angular/material/snack-bar'
+import { ViewEncapsulation } from '@angular/core'
+import { SnackbarComponent } from './snackbar/snackbar.component'
 
 @Component({
   selector: 'app-scene-canvas',
   templateUrl: './scene-canvas.component.html',
-  styleUrls: ['./scene-canvas.component.css']
+  styleUrls: ['./scene-canvas.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class SceneCanvasComponent implements OnInit {
   @ViewChild('glCanvas') public canvas!: ElementRef
@@ -47,7 +51,7 @@ export class SceneCanvasComponent implements OnInit {
   didInit = false
 
   constructor(private deviceService: DeviceDetectorService,
-     private shaderService: ShaderService) {
+     private shaderService: ShaderService, private snackBar: MatSnackBar) {
     shaderService.onInit.subscribe((val) => {
       if (this.didInit) {
         this.main()
@@ -56,6 +60,12 @@ export class SceneCanvasComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // TEST
+    // localStorage.setItem("tuto diff", "lala")
+
+    if (localStorage.getItem("tuto diff") != "true") {
+      this.snackBar.openFromComponent(SnackbarComponent)
+    }
   }
 
   ngAfterViewInit(): void {

@@ -24,3 +24,9 @@ canvas {
   border-radius: 5px;
   padding: 3px 7px;
 }
+
+.mat-snack-bar-container {
+  /* min-width: calc(min(600px, 80%)) !important; */
+  color: white !important;
+  background-color: #222;
+}

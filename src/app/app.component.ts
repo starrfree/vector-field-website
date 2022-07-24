@@ -1,4 +1,5 @@
 import { Component, ViewChild, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { SceneCanvasComponent } from './scene-canvas/scene-canvas.component';
 
 @Component({
@@ -27,18 +28,11 @@ export class AppComponent {
   }
   fullScreen: boolean = false
 
+  constructor(private snackBar: MatSnackBar) {
+
+  }
+
   ngOnInit() {
-    // function replaceInt(str: string): string {
-    //   return str.replace(/\d*\.?\d+/g, (match) => { // (?![u0-9])
-    //     return match.includes('.') ? match : match + '.0';
-    //   });
-    // }
-    
-    // console.log(replaceInt("12.75"));
-    // console.log(replaceInt("12"));
-    // console.log(replaceInt("12.75 and 12 and 3"));
-    // console.log(replaceInt("1 and 12.54 and 13u"));
-    // console.log(replaceInt("12.21 and 12544323u and 0"));
   }
 
   initialize(event: any) {

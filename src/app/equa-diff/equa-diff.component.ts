@@ -13,6 +13,7 @@ export class EquaDiffComponent implements OnInit {
   }
   public set language(v : "fr" | "en") {
     this._language = v;
+    localStorage.setItem("language", v)
     MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
     MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
   }
@@ -89,6 +90,7 @@ export class EquaDiffComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+    this.language = (localStorage.getItem("language") ?? "en") as "en" | "fr"
   }
 
   ngAfterViewInit(): void {

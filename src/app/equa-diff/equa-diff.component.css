@@ -50,11 +50,13 @@ p {
 }
 
 .all-container {
-  margin-bottom: 300px;
+  padding-bottom: 300px;
 }
 
 .language-select-container {
+  width: 800px;
   padding-top: 10px;
+  text-align: right;
 }
 
 .language-select-container select {

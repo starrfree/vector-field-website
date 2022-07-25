@@ -60,7 +60,7 @@ p a {
 }
 
 .language-select-container {
-  width: 800px;
+  width: calc(min(800px, 100%));
   padding-top: 10px;
   text-align: right;
 }

@@ -8,7 +8,7 @@
   margin-top: -10px;
   margin-bottom: 40px;
   text-underline-offset: 2px;
-  text-decoration-thickness: 0.1px;
+  text-decoration-thickness: 1px;
 }
 
 .equation {
@@ -17,6 +17,12 @@
 
 p {
   font-size: 17px;
+}
+
+p a {
+  color: inherit;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 0.15px;
 }
 
 .container {

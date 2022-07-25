@@ -24,5 +24,16 @@ a {
 a:focus {
   outline: 1px solid gray !important;
 }
+
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+::-moz-selection { /* Code for Firefox */
+  color: white;
+  background: rgb(27, 171, 218);
+}
+
+::selection {
+  color: white;
+  background: rgb(27, 171, 218);
+}

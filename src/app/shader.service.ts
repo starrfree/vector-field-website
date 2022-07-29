@@ -91,6 +91,9 @@ export class ShaderService {
   }
 
   public checkUpdateShader(x: string, y: string): boolean {
+    if (!this.gl) {
+      return true
+    }
     var updateVertexShaderSource = this.transformUpdateShader(x, y)
     const shader = this.gl.createShader(this.gl.VERTEX_SHADER)
     if (!shader) {

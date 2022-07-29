@@ -32,6 +32,7 @@ float random(uint seed);
 void main() {
   float x = (i_Position.x + 1.0) / 2.0 * (u_xRange.y - u_xRange.x) + u_xRange.x;
   float y = (i_Position.y + 1.0) / 2.0 * (u_yRange.y - u_yRange.x) + u_yRange.x;
+  float z = 0.0;
   vec2 vect = vec2($$x$$, $$y$$);
   // o_Velocity = vec2(cos(y * 10.0), sin(x * 20.0));
   // o_Velocity = vec2(x*x - y*y, x*y);

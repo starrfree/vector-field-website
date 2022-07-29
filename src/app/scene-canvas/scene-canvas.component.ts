@@ -185,7 +185,7 @@ export class SceneCanvasComponent implements OnInit {
       if (this.parameters.t > this.parameters.maxT) {
         this.parameters.t = this.parameters.minT
       }
-      if (this.dt > 0) {
+      if (this.dt > 0) {
         this.parameters.t += .01 / this.dt * 10.
       }
       this.parametersChange.emit(this.parameters)

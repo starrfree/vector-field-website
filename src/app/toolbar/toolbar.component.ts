@@ -106,7 +106,7 @@ export class ToolbarComponent implements OnInit {
 
   open2D() {
     this.activatedRoute.queryParamMap.subscribe((map: any) => {
-      if (Object.keys(this.parameters).length !== 0) {
+      if (Object.keys(map.params).length !== 0) {
         var params: any = {...this.parameters}
         params['showCube'] = undefined
         params['showAxes'] = undefined

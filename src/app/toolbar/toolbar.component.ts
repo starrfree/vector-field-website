@@ -71,6 +71,9 @@ export class ToolbarComponent implements OnInit {
     // this.changeURL()
     this.shaderService.onInit.subscribe(val => {
       this.activatedRoute.queryParamMap.subscribe((map: any) => {
+        if (Object.keys(map.params).length === 0) {
+          return
+        }
         var params = map.params
         var parameters: any = this.parameters
         var keys = Object.keys(this.parameters)
@@ -102,7 +105,19 @@ export class ToolbarComponent implements OnInit {
   }
 
   open2D() {
-    window.location.href = 'https://vectorfield-dot-starfree.ew.r.appspot.com'
+    this.activatedRoute.queryParamMap.subscribe((map: any) => {
+      if (Object.keys(this.parameters).length !== 0) {
+        var params: any = {...this.parameters}
+        params['showCube'] = undefined
+        params['showAxes'] = undefined
+        params['zRange'] = undefined
+        var url = this.router.createUrlTree(['vectorfield-dot-starfree.ew.r.appspot.com/'], {relativeTo: this.activatedRoute, queryParams: params}).toString()
+        url = url.slice(1)
+        window.location.href = 'https://' + url
+      } else {
+        window.location.href = 'https://vectorfield-dot-starfree.ew.r.appspot.com'
+      }
+    })
     // window.location.href = 'http://localhost:4200'
   }
 

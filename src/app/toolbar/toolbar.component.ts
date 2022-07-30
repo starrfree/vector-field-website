@@ -232,4 +232,8 @@ export class ToolbarComponent implements OnInit {
     }
     this.parameters.yRange[1] = x
   }
+
+  removeSnackbar() {
+    localStorage.setItem("tuto diff", "true")
+  }
 }

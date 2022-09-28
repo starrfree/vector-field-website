@@ -17,6 +17,7 @@
 .action-button {
   padding: 0;
   min-width: 35px;
+  margin-left: 5px;
   /* width: 30px;
   height: 30px; */
 }

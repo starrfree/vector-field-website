@@ -50,8 +50,7 @@ export class SceneCanvasComponent implements OnInit {
   reset: boolean = false
   didInit = false
 
-  constructor(private deviceService: DeviceDetectorService,
-     private shaderService: ShaderService, private snackBar: MatSnackBar) {
+  constructor(private deviceService: DeviceDetectorService,  private shaderService: ShaderService, private snackBar: MatSnackBar) {
     shaderService.onInit.subscribe((val) => {
       if (this.didInit) {
         this.main()

@@ -19,6 +19,7 @@ export class SnackbarComponent {
   }
 
   cancel() {
+    localStorage.setItem("tuto diff", "true")
     this.snackBarRef.dismiss()
   }
 }

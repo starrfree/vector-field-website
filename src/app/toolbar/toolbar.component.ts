@@ -101,11 +101,11 @@ export class ToolbarComponent implements OnInit {
         params.zRange = [-1, 1]
         params.showCube = true
         params.showAxes = true
-        var url = this.router.createUrlTree(['vectorfield3d-dot-starfree.ew.r.appspot.com/'], {relativeTo: this.activatedRoute, queryParams: params}).toString()
+        var url = this.router.createUrlTree(['vectorfield3d.starfree.app/'], {relativeTo: this.activatedRoute, queryParams: params}).toString()
         url = url.slice(1)
         window.location.href = 'https://' + url
       } else {
-        window.location.href = 'https://vectorfield3d-dot-starfree.ew.r.appspot.com/'
+        window.location.href = 'https://vectorfield3d.starfree.app/'
       }
     })
   }

@@ -430,7 +430,8 @@ export class SceneCanvasComponent implements OnInit {
       input: input,
       output: output,
       corners: corners,
-      cubeVertices: vertices
+      cubeVertices: vertices,
+      cubeVerticesCount: positions.length
     }
   }
 
@@ -607,7 +608,7 @@ export class SceneCanvasComponent implements OnInit {
         if (this.parameters.showCube) {
           count += 44
         }
-        gl.drawArrays(gl.LINES, 0, count)
+        gl.drawArrays(gl.LINES, 0, this.buffers.cubeVerticesCount / 3)
       }
 
       gl.bindFramebuffer(gl.FRAMEBUFFER, null)

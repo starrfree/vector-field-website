@@ -88,14 +88,14 @@
   <div class="divider field-divider"></div>
   <div class="field-container checkbox-field">
     <div class="checkbox-container">
-      <input #normalize type="checkbox" [ngModel]="parameters.showAxes" (ngModelChange)="parameters.showAxes = $event; parametersChange.emit(parameters); changeURL()" (keydown.enter)="blur()">
-      <label for="normalize" class="after-label">Show axes</label>
+      <input #axes type="checkbox" [ngModel]="parameters.showAxes" (ngModelChange)="parameters.showAxes = $event; parametersChange.emit(parameters); changeURL()" (keydown.enter)="blur()">
+      <label for="axes" class="after-label">Show axes</label>
     </div>
   </div>
   <div class="field-container checkbox-field">
     <div class="checkbox-container">
-      <input #normalize type="checkbox" [ngModel]="parameters.showCube" (ngModelChange)="parameters.showCube = $event; parametersChange.emit(parameters); changeURL()" (keydown.enter)="blur()">
-      <label for="normalize" class="after-label">Show limits</label>
+      <input #limits type="checkbox" [ngModel]="parameters.showCube" (ngModelChange)="parameters.showCube = $event; parametersChange.emit(parameters); changeURL()" (keydown.enter)="blur()">
+      <label for="limits" class="after-label">Show limits</label>
     </div>
   </div>
   <div id="slow-field" class="field-container color-picker">
@@ -115,7 +115,7 @@
     Checkout <a href="https://github.com/starrfree/vector-field-website" target="_blank" rel="noopener noreferrer" class="github-a">Github</a> for help.
     <br>
     <br>
-    To understand how to visualize differential equations using Vector Field <a href="https://vectorfield3d-dot-starfree.ew.r.appspot.com/help" target="_blank" rel="noopener noreferrer" class="github-a">click here</a>
+    To understand how to visualize differential equations using Vector Field <a href="https://vectorfield3d.starfree.app/help" target="_blank" rel="noopener noreferrer" class="github-a">click here</a>
   </div>
 </div>
 <!-- 

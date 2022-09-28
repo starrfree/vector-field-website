@@ -111,11 +111,11 @@ export class ToolbarComponent implements OnInit {
         delete params['showCube']
         delete params['showAxes']
         delete params['zRange']
-        var url = this.router.createUrlTree(['vectorfield-dot-starfree.ew.r.appspot.com/'], {relativeTo: this.activatedRoute, queryParams: params}).toString()
+        var url = this.router.createUrlTree(['vectorfield.starfree.app/'], {relativeTo: this.activatedRoute, queryParams: params}).toString()
         url = url.slice(1)
         window.location.href = 'https://' + url
       } else {
-        window.location.href = 'https://vectorfield-dot-starfree.ew.r.appspot.com'
+        window.location.href = 'https://vectorfield.starfree.app'
       }
     })
     // window.location.href = 'http://localhost:4200'

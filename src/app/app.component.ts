@@ -20,7 +20,7 @@ export class AppComponent {
     xRange: [-1, 1],
     yRange: [-1, 1],
     lifetime: 100,
-    particleCount: 10000,
+    particleCount: 1000,
     normalize: false,
     speed: 1,
     color1: [1, 1, 1, 1],

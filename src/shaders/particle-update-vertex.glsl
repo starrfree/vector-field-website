@@ -7,7 +7,6 @@ uniform float t;
 uniform float dt;
 uniform vec2 u_xRange;
 uniform vec2 u_yRange;
-uniform vec2 u_zRange;
 uniform float u_Lifetime;
 uniform int u_Step;
 uniform int u_Normalize;
@@ -35,8 +34,7 @@ float random(uint seed);
 void main() {
   float x = (i_Position.x + 1.0) / 2.0 * (u_xRange.y - u_xRange.x) + u_xRange.x;
   float y = (i_Position.y + 1.0) / 2.0 * (u_yRange.y - u_yRange.x) + u_yRange.x;
-  float z = (i_Position.z + 1.0) / 2.0 * (u_zRange.y - u_zRange.x) + u_zRange.x;
-  vec3 vect = vec3($$x$$, $$y$$, $$z$$);
+  vec3 vect = vec3($$x$$, $$y$$, 0.0);
   // o_Velocity = vec2(cos(y * 10.0), sin(x * 20.0));
   // o_Velocity = vec2(x*x - y*y, x*y);
   o_Velocity = vect;
@@ -44,11 +42,13 @@ void main() {
     o_Velocity = o_Velocity / length(o_Velocity);
   }
   vec3 newPosition = i_Position + i_Velocity * dt * u_Speed / 5000.0;
+  newPosition = normalize(newPosition);
   float newLifetime = i_Lifetime - 1.0;
   if (newPosition.x < -1.0 || newPosition.x > 1.0 || newPosition.y < -1.0 || newPosition.y > 1.0  || newPosition.z < -1.0 || newPosition.z > 1.0 || i_Lifetime <= 0.0) {
     newPosition.x = random(uint(uint(i_Index) + hash(uint(u_Step))) * uint(4)) * 2.0 - 1.0; // rand(i_Position + 2.0 * i_Velocity, 1234.0)
     newPosition.y = random(uint(uint(i_Index) + hash(uint(u_Step))) * uint(4) + uint(1)) * 2.0 - 1.0; // rand(i_Position - i_Lifetime, 3456.0)
     newPosition.z = random(uint(uint(i_Index) + hash(uint(u_Step))) * uint(4) + uint(2)) * 2.0 - 1.0;
+    newPosition = normalize(newPosition);
     newLifetime = u_Lifetime + random(uint(uint(i_Index) + hash(uint(u_Step))) * uint(4) + uint(3)) * u_Lifetime; // rand(newPosition * i_Velocity, 2431.0)
   }
   o_Lifetime = newLifetime;
@@ -62,12 +62,12 @@ void main() {
   // }
   o_Color = clamp(color, 0.0, 1.0);
   gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(i_Position, 1.0);
-  gl_PointSize = clamp(u_Size * 3.0 * ((u_ModelViewMatrix * vec4(i_Position, 1.0)).z + 5.0), 0.0, 4.0);
+  float camz = (u_ModelViewMatrix * vec4(i_Position, 1.0)).z;
+  gl_PointSize = clamp(u_Size * 3.0 * (camz + 5.0), 0.0, 3.0);
+  if (camz < -3.81) {
+    gl_PointSize = 0.0;
+  }
 }
-
-// float rand(vec2 xy, float seed) {
-//   return fract(tan(distance(xy*1.6180339887, xy)*seed)*xy.x);
-// }
 
 uint hash(uint ste) {
     ste ^= 2747636419u;

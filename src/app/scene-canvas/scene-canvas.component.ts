@@ -30,8 +30,8 @@ export class SceneCanvasComponent implements OnInit {
   step: number = 0
   size: number = 1
   cubeRotation: number = 0
-  cubeXRotation: number = 0.4//0.3
-  cubeYRotation: number = -0.4//-0.15
+  cubeXRotation: number = 0//0.4//0.3
+  cubeYRotation: number = 0//-0.4//-0.15
 
   xPosition: [number, number] = [0, 0]
 
@@ -100,7 +100,7 @@ export class SceneCanvasComponent implements OnInit {
     this.shaderService.gl = gl;
     this.buffers = this.initBuffers(gl)
     this.textures = this.initTextures(gl, this.canvas.nativeElement.width, this.canvas.nativeElement.height)
-    var updateVertexShaderSource = this.shaderService.transformUpdateShader(this.parameters.x, this.parameters.y, this.parameters.z)
+    var updateVertexShaderSource = this.shaderService.transformUpdateShader(this.parameters.x, this.parameters.y)
     const updateShaderProgram = this.shaderService.initShaderProgram(gl, updateVertexShaderSource, this.shaderService.updateFragmentSource, ["o_Index", "o_Position", "o_Velocity", "o_Lifetime"])
     const renderShaderProgram = this.shaderService.initShaderProgram(gl, this.shaderService.renderVertexSource, this.shaderService.renderFragmentSource)
     const processShaderProgram = this.shaderService.initShaderProgram(gl, this.shaderService.processVertexSource, this.shaderService.processFragmentSource)
@@ -123,7 +123,6 @@ export class SceneCanvasComponent implements OnInit {
           dt: gl.getUniformLocation(updateShaderProgram, 'dt'),
           xRange: gl.getUniformLocation(updateShaderProgram, 'u_xRange'),
           yRange: gl.getUniformLocation(updateShaderProgram, 'u_yRange'),
-          zRange: gl.getUniformLocation(updateShaderProgram, 'u_zRange'),
           lifetime: gl.getUniformLocation(updateShaderProgram, 'u_Lifetime'),
           step: gl.getUniformLocation(updateShaderProgram, 'u_Step'),
           normalize: gl.getUniformLocation(updateShaderProgram, 'u_Normalize'),
@@ -294,9 +293,14 @@ export class SceneCanvasComponent implements OnInit {
       values.push(i)
 
       // POSITION
-      values.push(r())
-      values.push(r())
-      values.push(r())
+      let x = r(), y = r(), z = r()
+      let norm = Math.sqrt(x*x + y*y + z*z)
+      x /= norm
+      y /= norm
+      z /= norm
+      values.push(x)
+      values.push(y)
+      values.push(z)
       
       // VELOCITY
       values.push(0)
@@ -322,100 +326,29 @@ export class SceneCanvasComponent implements OnInit {
     const corners = gl.createBuffer()
     gl.bindBuffer(gl.ARRAY_BUFFER, corners)
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
-    var cube = [
-      // Front face
-      -1.0, -1.0,  1.0,
-      1.0, -1.0,  1.0,
-      -1.0,  1.0,  1.0,
-      1.0,  1.0,  1.0,
-    
-      // Back face
-      -1.0, -1.0, -1.0,
-      -1.0,  1.0, -1.0,
-       1.0,  1.0, -1.0,
-       1.0, -1.0, -1.0,
-    
-      // Top face
-      -1.0,  1.0, -1.0,
-      -1.0,  1.0,  1.0,
-       1.0,  1.0,  1.0,
-       1.0,  1.0, -1.0,
-    
-      // Bottom face
-      -1.0, -1.0, -1.0,
-       1.0, -1.0, -1.0,
-       1.0, -1.0,  1.0,
-      -1.0, -1.0,  1.0,
-    
-      // Right face
-       1.0, -1.0, -1.0,
-       1.0,  1.0, -1.0,
-       1.0,  1.0,  1.0,
-       1.0, -1.0,  1.0,
-    
-      // Left face
-      -1.0, -1.0, -1.0,
-      -1.0, -1.0,  1.0,
-      -1.0,  1.0,  1.0,
-      -1.0,  1.0, -1.0,
-
-      // Connects
-      1, -1, -1,
-      1, -1, 1,
-      -1, 1, 1,
-      -1, -1, 1,
-      -1, 1, -1,
-      1, 1, -1,
-    ]
-    var axes =  [
-      // y
-      -1, -1, -1,
-      -1, 1.2, -1,
-      -1, 1.2, -1,
-      -0.97, 1.14, -1.03,
-      -1, 1.2, -1,
-      -1.03, 1.14, -0.97,
-
-      // z
-      -1, -1, -1,
-      -1, -1, 1.2,
-      -1, -1, 1.2,
-      -0.97, -1.03, 1.14,
-      -1, -1, 1.2,
-      -1.03, -0.97, 1.14,
-
-      // x
-      -1, -1, -1,
-      1.2, -1, -1,
-      1.2, -1, -1,
-      1.14, -0.97, -1.03,
-      1.2, -1, -1,
-      1.14, -1.03, -0.97,
-
-      // labels
-      // x
-      1.3, -0.89, -1,
-      1.25, -0.97, -1,
-      1.25, -0.89, -1,
-      1.3, -0.97, -1,
-
-      // y
-      -0.98, 1.31, -1.02,
-      -1.02, 1.24, -0.98,
-      -1.02, 1.31, -0.98,
-      -1, 1.275, -1,
-
-      // z
-      -1, -0.94, 1.32,
-      -1, -0.86, 1.26,
-      -1, -0.94, 1.32,
-      -1, -0.94, 1.26,
-      -1, -0.86, 1.26,
-      -1, -0.86, 1.32,
-    ]
+    var sphere: number [] = []
+    for (var i = 0; i <= 2; i++) {
+      let x = 0, y = 0, z = 0
+      let count = 0
+      for (var theta = 0; theta <= 2 * Math.PI; theta += 2 * Math.PI / 70) {
+        let a = Math.cos(theta)
+        let b = Math.sin(theta)
+        x = i == 0 ? a : i == 1 ? b : 0
+        y = i == 0 ? b : i == 1 ? 0 : a
+        z = i == 0 ? 0 : i == 1 ? a : b
+        sphere.push(x); sphere.push(y); sphere.push(z)
+        if (count > 0) {
+          sphere.push(x); sphere.push(y); sphere.push(z)
+          count++
+        }
+        count++
+      }
+      sphere.push(x); sphere.push(y); sphere.push(z)
+    }  
+    var axes: number[] = []
     positions = []
     if (this.parameters.showCube) {
-      positions.push(...cube)
+      positions.push(...sphere)
     }
     if (this.parameters.showAxes) {
       positions.push(...axes)
@@ -471,8 +404,9 @@ export class SceneCanvasComponent implements OnInit {
   }
 
   getMatrices(gl: WebGL2RenderingContext) {
-    const fieldOfView = 45 * Math.PI / 180;   // in radians
-    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    const canvas = gl.canvas as HTMLElement
+    const fieldOfView = 38 * Math.PI / 180;   // in radians
+    const aspect = canvas.clientWidth / canvas.clientHeight;
     const zNear = 0.1;
     const zFar = 100.0;
     var projectionMatrix = mat4.create();
@@ -480,16 +414,6 @@ export class SceneCanvasComponent implements OnInit {
 
     var modelViewMatrix = mat4.create();
     mat4.translate(modelViewMatrix, modelViewMatrix, [0.0, 0.0, -4.0]);
-    // mat4.rotate(modelViewMatrix, modelViewMatrix, Math.PI / 6, [0, 1, 0]);
-    // mat4.rotate(modelViewMatrix, modelViewMatrix, .0 * this.cubeRotation, [0, 0, 1]);
-    
-    // var yAxis = vec4.clone([0, 1, 0, 1]);
-    // {
-    //   var rotationMatrix = mat4.create();
-    //   mat4.rotate(rotationMatrix, rotationMatrix, this.cubeXRotation, [-1, 0, 0]);
-    //   vec4.transformMat4(yAxis, yAxis, rotationMatrix)
-    // }
-    // mat4.rotate(modelViewMatrix, modelViewMatrix, this.cubeYRotation, [yAxis[0], yAxis[1], yAxis[2]]);
 
     var xAxis = vec4.clone([1, 0, 0, 1]);
     {
@@ -524,7 +448,6 @@ export class SceneCanvasComponent implements OnInit {
       gl.uniform1f(programInfo.uniformLocations.update.dt, this.dt)
       gl.uniform2f(programInfo.uniformLocations.update.xRange, this.parameters.xRange[0], this.parameters.xRange[1])
       gl.uniform2f(programInfo.uniformLocations.update.yRange, this.parameters.yRange[0], this.parameters.yRange[1])
-      gl.uniform2f(programInfo.uniformLocations.update.zRange, this.parameters.zRange[0], this.parameters.zRange[1])
       gl.uniform1f(programInfo.uniformLocations.update.lifetime, this.parameters.lifetime)
       gl.uniform1i(programInfo.uniformLocations.update.step, this.step)
       gl.uniform1i(programInfo.uniformLocations.update.normalize, this.parameters.normalize)

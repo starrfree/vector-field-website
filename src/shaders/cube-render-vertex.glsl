@@ -6,7 +6,10 @@ uniform mat4 u_ProjectionMatrix;
 uniform sampler2D u_Texture;
 
 in vec4 i_VertexPosition;
+out vec4 o_VertexPosition;
 
 void main() {
-  gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * i_VertexPosition;
+  vec4 pos = u_ProjectionMatrix * u_ModelViewMatrix * i_VertexPosition;
+  gl_Position = pos;
+  o_VertexPosition = i_VertexPosition;
 }

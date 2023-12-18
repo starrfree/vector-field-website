@@ -100,11 +100,11 @@ export class ShaderService {
     return shader
   }
 
-  public checkUpdateShader(x: string, y: string, z: string): boolean {
+  public checkUpdateShader(x: string, y: string): boolean {
     if (!this.gl) {
       return true
     }
-    var updateVertexShaderSource = this.transformUpdateShader(x, y, z)
+    var updateVertexShaderSource = this.transformUpdateShader(x, y)
     const shader = this.gl.createShader(this.gl.VERTEX_SHADER)
     if (!shader) {
       return false
@@ -118,17 +118,14 @@ export class ShaderService {
     return true
   }
 
-  public transformUpdateShader(x: string, y: string, z: string): string {
+  public transformUpdateShader(x: string, y: string): string {
     var newX = x.replace(/\d*\.?\d+/g, (match) => {
       return match.includes('.') ? match : match + '.0';
     });
     var newY = y.replace(/\d*\.?\d+/g, (match) => {
       return match.includes('.') ? match : match + '.0';
     });
-    var newZ = z.replace(/\d*\.?\d+/g, (match) => {
-      return match.includes('.') ? match : match + '.0';
-    });
-    var updateVertexShaderSource = this.updateVertexSource.replace("$$x$$", newX).replace("$$y$$", newY).replace("$$z$$", newZ)
+    var updateVertexShaderSource = this.updateVertexSource.replace("$$x$$", newX).replace("$$y$$", newY)
     return updateVertexShaderSource
   }
 }

@@ -12,13 +12,11 @@ export class ToolbarComponent implements OnInit {
   @Input() parameters: any = {
     x: "x",
     y: "y",
-    z: "z",
     t: 0,
     minT: 0,
     maxT: 10,
     xRange: [-1, 1],
     yRange: [-1, 1],
-    zRange: [-1, 1],
     lifetime: 100,
     particleCount: 10000,
     normalize: false,
@@ -31,18 +29,15 @@ export class ToolbarComponent implements OnInit {
   @Output() parametersChange = new EventEmitter<any>()
   @Input() x = ""
   @Input() y = ""
-  @Input() z = ""
   @Input() ranges = {
     minT: 0,
     maxT: 10,
     xRange: [-1, 1],
-    yRange: [-1, 1],
-    zRange: [-1, 1]
+    yRange: [-1, 1]
   }
   error = {
     x: false,
-    y: false,
-    z: false
+    y: false
   }
   
   _color1: string = "#ffffff"
@@ -110,7 +105,6 @@ export class ToolbarComponent implements OnInit {
         var params: any = {...this.parameters}
         delete params['showCube']
         delete params['showAxes']
-        delete params['zRange']
         var url = this.router.createUrlTree(['vectorfield.starfree.app/'], {relativeTo: this.activatedRoute, queryParams: params}).toString()
         url = url.slice(1)
         window.location.href = 'https://' + url
@@ -141,10 +135,9 @@ export class ToolbarComponent implements OnInit {
   
   submitXY() {
     this.checkXY()
-    if (!this.error.x && !this.error.y  && !this.error.z) {
+    if (!this.error.x && !this.error.y) {
       this.parameters.x = this.x
       this.parameters.y = this.y
-      this.parameters.z = this.z
       this.parametersChange.emit(this.parameters)
       this.changeURL()
     }
@@ -159,20 +152,17 @@ export class ToolbarComponent implements OnInit {
     if (!this.shaderService.didInit) {
       return
     }
-    var xError = !this.shaderService.checkUpdateShader(this.x, "y", "z")
-    var yError = !this.shaderService.checkUpdateShader("x", this.y, "z")
-    var zError = !this.shaderService.checkUpdateShader("x", "y", this.z)
+    var xError = !this.shaderService.checkUpdateShader(this.x, "y")
+    var yError = !this.shaderService.checkUpdateShader("x", this.y)
     this.error = {
       x: xError,
-      y: yError,
-      z: zError
+      y: yError
     }
   }
 
   checkParams(params: any) {
-    var xError = !this.shaderService.checkUpdateShader(params.x, "y", "z")
-    var yError = !this.shaderService.checkUpdateShader("x", params.y, "z")
-    var zError = !this.shaderService.checkUpdateShader("x", "y", params.z)
+    var xError = !this.shaderService.checkUpdateShader(params.x, "y")
+    var yError = !this.shaderService.checkUpdateShader("x", params.y)
     var particleCountError = isNaN(Number(params.particleCount))
     var lifetimeError = isNaN(Number(params.lifetime))
     var speedError = isNaN(Number(params.speed))
@@ -183,9 +173,7 @@ export class ToolbarComponent implements OnInit {
     var maxXError = isNaN(Number(params.xRange[1]))
     var minYError = isNaN(Number(params.yRange[0]))
     var maxYError = isNaN(Number(params.yRange[1]))
-    var minZError = isNaN(Number(params.zRange[0]))
-    var maxZError = isNaN(Number(params.zRange[1]))
-    return xError || yError || zError || minTError || maxTError || minXError || maxXError || minYError || maxYError || minZError || maxZError || particleCountError || lifetimeError || speedError || tError
+    return xError || yError || minTError || maxTError || minXError || maxXError || minYError || maxYError || particleCountError || lifetimeError || speedError || tError
   }
 
   hexToRGB(hex: string) {
@@ -248,21 +236,5 @@ export class ToolbarComponent implements OnInit {
       n = 0
     }
     this.parameters.yRange[1] = n
-  }
-
-  setMinZ() {
-    var n = Number(this.ranges.zRange[0])
-    if (isNaN(n) || !isFinite(n)) {
-      n = 0
-    }
-    this.parameters.zRange[0] = n
-  }
-
-  setMaxZ() {
-    var n = Number(this.ranges.zRange[1])
-    if (isNaN(n) || !isFinite(n)) {
-      n = 0
-    }
-    this.parameters.zRange[1] = n
   }
 }

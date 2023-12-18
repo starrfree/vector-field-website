@@ -12,15 +12,13 @@ export class VectorfieldComponent implements OnInit {
 
   title = 'Vector Field';
   parameters = {
-    x: "x",//"cos(10.0 * y)",
-    y: "y",//"sin(20.0 * x)",
-    z: "z",
+    x: "x",
+    y: "y",
     t: 0,
     minT: 0,
     maxT: 10,
     xRange: [-1, 1],
     yRange: [-1, 1],
-    zRange: [-1, 1],
     lifetime: 100,
     particleCount: 10000,
     normalize: false,

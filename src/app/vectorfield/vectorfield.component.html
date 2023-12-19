@@ -5,9 +5,7 @@
   <app-toolbar class="scrollable" [parameters]="parameters" (parametersChange)="parameters = $event;initialize($event)" [x]="parameters.x" [y]="parameters.y" 
   [ranges]="{
     minT: parameters.minT,
-    maxT: parameters.maxT,
-    xRange: [parameters.xRange[0], parameters.xRange[1]],
-    yRange: [parameters.yRange[0], parameters.yRange[1]]
+    maxT: parameters.maxT
   }"></app-toolbar>
 </div>
 <div class="full-screen-button-container" [style.left]="fullScreen ? '10px' : '280px'">

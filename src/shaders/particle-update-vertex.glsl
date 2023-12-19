@@ -5,8 +5,6 @@ uniform mat4 u_ModelViewMatrix;
 uniform mat4 u_ProjectionMatrix;
 uniform float t;
 uniform float dt;
-uniform vec2 u_xRange;
-uniform vec2 u_yRange;
 uniform float u_Lifetime;
 uniform int u_Step;
 uniform int u_Normalize;
@@ -31,19 +29,15 @@ uint hash(uint ste);
 float random(uint seed);
 vec2 PhiN(vec3 p);
 vec3 inv_PhiN(vec2 p);
-mat2x3 dinv_PhiN(vec2 p);
+mat3x2 dinv_PhiN(vec2 p);
+mat3x2 inv_dPhiN(vec3 p);
 
 void main() {
-  vec3 p;
-  p.x = (i_Position.x + 1.0) / 2.0 * (u_xRange.y - u_xRange.x) + u_xRange.x;
-  p.y = (i_Position.y + 1.0) / 2.0 * (u_yRange.y - u_yRange.x) + u_yRange.x;
-  p.z = (i_Position.z + 1.0) / 2.0 * (u_yRange.y - u_yRange.x) + u_yRange.x;
-
-  vec2 xy = PhiN(p);
+  vec2 xy = PhiN(i_Position);
   float x = xy.x;
   float y = xy.y;
   vec2 uv = vec2($$x$$, $$y$$);
-  vec3 vect = dinv_PhiN(xy) * uv;
+  vec3 vect = uv * inv_dPhiN(i_Position);
   
   o_Velocity = vect;
   if (u_Normalize == 1 && length(o_Velocity) != 0.0) {
@@ -72,7 +66,7 @@ void main() {
   gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(i_Position, 1.0);
   float camz = (u_ModelViewMatrix * vec4(i_Position, 1.0)).z;
   gl_PointSize = clamp(u_Size * 3.0 * (camz + 5.0), 0.0, 3.0);
-  if (camz < -3.81) {
+  if (camz < -3.7) {
     gl_PointSize = 0.0;
   }
 }
@@ -90,15 +84,19 @@ vec3 inv_PhiN(vec2 p) {
   return vec3(2.0 * u, 2.0 * v, u*u + v*v - 1.0) / (u*u + v*v + 1.0);
 }
 
-mat2x3 dinv_PhiN(vec2 p) {
+mat3x2 dinv_PhiN(vec2 p) {
   float u = p.x;
   float v = p.y;
   float denom = pow(u*u + v*v + 1.0, 2.0);
-  return 2.0 / denom * mat2x3(
+  return 2.0 / denom * mat3x2(
     1.0 - u*u + v*v, -2.0 * u * v,
     -2.0 * u * v, 1.0 + u*u - v*v,
     2.0 * u, 2.0 * v
   );
+}
+
+mat3x2 inv_dPhiN(vec3 p) {
+  return dinv_PhiN(PhiN(p));
 }
 
 uint hash(uint ste) {

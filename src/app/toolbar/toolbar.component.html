@@ -3,11 +3,14 @@
     <a href="/" class="title-a">Vector Field</a>
   </div>
   <div class="field-group dimension-container">
-    <div class="dimension-toggle noselect" id="D2" [style.background-color]="'#333'" [style.border]="'1px solid #111'" (click)="open2D()">
+    <div class="dimension-toggle noselect" id="D2" (click)="open2D()">
       2D
     </div>
-    <div class="dimension-toggle noselect" id="D3" [style.background-color]="'rgb(76, 76, 76)'" [style.border]="'1px solid #888'">
+    <div class="dimension-toggle noselect" id="D3" (click)="open3D()">
       3D
+    </div>
+    <div class="dimension-toggle noselect" id="S2">
+      S2
     </div>
   </div>
   <div class="field-group">
@@ -34,18 +37,6 @@
       <input type="range" class="small-slider dark-background-slider" [attr.min]="parameters.minT" [attr.max]="parameters.maxT" step="0.01"
        [(ngModel)]="parameters.t" (keydown.enter)="blur()">
       <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.maxT" (focusout)="setMaxT(); changeURL()" (keydown.enter)="blur()">
-    </div>
-    <div class="field-container">
-      <span class="before-label">x</span>
-      <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.xRange[0]" (focusout)="setMinX(); changeURL()" (keydown.enter)="blur()">
-      <div class="divider range-divider"></div>
-      <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.xRange[1]" (focusout)="setMaxX(); changeURL()" (keydown.enter)="blur()">
-    </div>
-    <div class="field-container">
-      <span class="before-label">y</span>
-      <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.yRange[0]" (focusout)="setMinY(); changeURL()" (keydown.enter)="blur()">
-      <div class="divider range-divider"></div>
-      <input type="text" class="text-field before-label after-label small-field" [(ngModel)]="ranges.yRange[1]" (focusout)="setMaxY(); changeURL()" (keydown.enter)="blur()">
     </div>
   </div>
   <div class="divider field-divider"></div>
@@ -75,14 +66,8 @@
   <div class="divider field-divider"></div>
   <div class="field-container checkbox-field">
     <div class="checkbox-container">
-      <input #axes type="checkbox" [ngModel]="parameters.showAxes" (ngModelChange)="parameters.showAxes = $event; parametersChange.emit(parameters); changeURL()" (keydown.enter)="blur()">
-      <label for="axes" class="after-label">Show axes</label>
-    </div>
-  </div>
-  <div class="field-container checkbox-field">
-    <div class="checkbox-container">
       <input #limits type="checkbox" [ngModel]="parameters.showCube" (ngModelChange)="parameters.showCube = $event; parametersChange.emit(parameters); changeURL()" (keydown.enter)="blur()">
-      <label for="limits" class="after-label">Show limits</label>
+      <label for="limits" class="after-label">Show sphere</label>
     </div>
   </div>
   <div id="slow-field" class="field-container color-picker">

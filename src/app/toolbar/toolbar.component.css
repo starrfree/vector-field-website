@@ -262,22 +262,32 @@ input[type="checkbox"]:checked::before {
   color: gray;
   position: absolute;
   bottom: 10px;
-  top: 780px;
+  top: 600px;
   margin-left: 10px;
 }
 
 #D2 {
   border-radius: 7px 0 0 7px;
+  background-color: #333;
+  border: 1px solid #111;
+}
+
+#S2 {
+  border-radius: 0 7px 7px 0;
+  background-color: rgb(76, 76, 76);
+  border: 1px solid #888;
 }
 
 #D3 {
-  border-radius: 0 7px 7px 0;
+  background-color: #333;
+  border-top: 1px solid #111;
+  border-bottom: 1px solid #111;
 }
 
 .dimension-toggle {
   margin: auto;
   display: inline-block;
-  width: 110px;
+  width: 72px;
   padding: 4px 0;
   text-align: center;
 }

@@ -30,8 +30,8 @@ export class SceneCanvasComponent implements OnInit {
   step: number = 0
   size: number = 1
   cubeRotation: number = 0
-  cubeXRotation: number = 0.1
-  cubeYRotation: number = -0.3
+  cubeXRotation: number = 0.1//0.1
+  cubeYRotation: number = 0//-0.3
 
   xPosition: [number, number] = [0, 0]
 
@@ -121,8 +121,6 @@ export class SceneCanvasComponent implements OnInit {
           projectionMatrix: gl.getUniformLocation(updateShaderProgram, 'u_ProjectionMatrix'),
           t: gl.getUniformLocation(updateShaderProgram, 't'),
           dt: gl.getUniformLocation(updateShaderProgram, 'dt'),
-          xRange: gl.getUniformLocation(updateShaderProgram, 'u_xRange'),
-          yRange: gl.getUniformLocation(updateShaderProgram, 'u_yRange'),
           lifetime: gl.getUniformLocation(updateShaderProgram, 'u_Lifetime'),
           step: gl.getUniformLocation(updateShaderProgram, 'u_Step'),
           normalize: gl.getUniformLocation(updateShaderProgram, 'u_Normalize'),
@@ -344,14 +342,10 @@ export class SceneCanvasComponent implements OnInit {
         count++
       }
       sphere.push(x); sphere.push(y); sphere.push(z)
-    }  
-    var axes: number[] = []
+    }
     positions = []
     if (this.parameters.showCube) {
       positions.push(...sphere)
-    }
-    if (this.parameters.showAxes) {
-      positions.push(...axes)
     }
     const vertices = gl.createBuffer()
     gl.bindBuffer(gl.ARRAY_BUFFER, vertices)
@@ -405,7 +399,7 @@ export class SceneCanvasComponent implements OnInit {
 
   getMatrices(gl: WebGL2RenderingContext) {
     const canvas = gl.canvas as HTMLElement
-    const fieldOfView = 38 * Math.PI / 180;   // in radians
+    const fieldOfView = 35 * Math.PI / 180;   // in radians
     const aspect = canvas.clientWidth / canvas.clientHeight;
     const zNear = 0.1;
     const zFar = 100.0;
@@ -446,8 +440,6 @@ export class SceneCanvasComponent implements OnInit {
       gl.uniformMatrix4fv(programInfo.uniformLocations.update.projectionMatrix, false, projectionMatrix)
       gl.uniform1f(programInfo.uniformLocations.update.t, this.parameters.t)
       gl.uniform1f(programInfo.uniformLocations.update.dt, this.dt)
-      gl.uniform2f(programInfo.uniformLocations.update.xRange, this.parameters.xRange[0], this.parameters.xRange[1])
-      gl.uniform2f(programInfo.uniformLocations.update.yRange, this.parameters.yRange[0], this.parameters.yRange[1])
       gl.uniform1f(programInfo.uniformLocations.update.lifetime, this.parameters.lifetime)
       gl.uniform1i(programInfo.uniformLocations.update.step, this.step)
       gl.uniform1i(programInfo.uniformLocations.update.normalize, this.parameters.normalize)

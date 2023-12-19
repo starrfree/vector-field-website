@@ -15,14 +15,11 @@ export class ToolbarComponent implements OnInit {
     t: 0,
     minT: 0,
     maxT: 10,
-    xRange: [-1, 1],
-    yRange: [-1, 1],
     lifetime: 100,
     particleCount: 10000,
     normalize: false,
     speed: 1,
     showCube: true,
-    showAxes: true,
     color1: [1, 1, 1, 1],
     color2: [0.4, 0.4, 1, 1]
   }
@@ -31,9 +28,7 @@ export class ToolbarComponent implements OnInit {
   @Input() y = ""
   @Input() ranges = {
     minT: 0,
-    maxT: 10,
-    xRange: [-1, 1],
-    yRange: [-1, 1]
+    maxT: 10
   }
   error = {
     x: false,
@@ -103,8 +98,9 @@ export class ToolbarComponent implements OnInit {
     this.activatedRoute.queryParamMap.subscribe((map: any) => {
       if (this.location.path(true) !== '') {
         var params: any = {...this.parameters}
+        params.xRange = [-1, 1]
+        params.yRange = [-1, 1]
         delete params['showCube']
-        delete params['showAxes']
         var url = this.router.createUrlTree(['vectorfield.starfree.app/'], {relativeTo: this.activatedRoute, queryParams: params}).toString()
         url = url.slice(1)
         window.location.href = 'https://' + url
@@ -112,7 +108,26 @@ export class ToolbarComponent implements OnInit {
         window.location.href = 'https://vectorfield.starfree.app'
       }
     })
-    // window.location.href = 'http://localhost:4200'
+  }
+
+  open3D() {
+    this.activatedRoute.queryParamMap.subscribe((map: any) => {
+      if (this.location.path(true) !== '') {
+        var params: any = {...this.parameters}
+        params.t = 0
+        params.z = "0"
+        params.xRange = [-1, 1]
+        params.yRange = [-1, 1]
+        params.zRange = [-1, 1]
+        params.showCube = true
+        params.showAxes = true
+        var url = this.router.createUrlTree(['vectorfield3d.starfree.app/'], {relativeTo: this.activatedRoute, queryParams: params}).toString()
+        url = url.slice(1)
+        window.location.href = 'https://' + url
+      } else {
+        window.location.href = 'https://vectorfield3d.starfree.app/'
+      }
+    })
   }
 
   goToRoot() {
@@ -169,11 +184,7 @@ export class ToolbarComponent implements OnInit {
     var minTError = isNaN(Number(params.minT))
     var maxTError = isNaN(Number(params.maxT))
     var tError = isNaN(Number(params.t))
-    var minXError = isNaN(Number(params.xRange[0]))
-    var maxXError = isNaN(Number(params.xRange[1]))
-    var minYError = isNaN(Number(params.yRange[0]))
-    var maxYError = isNaN(Number(params.yRange[1]))
-    return xError || yError || minTError || maxTError || minXError || maxXError || minYError || maxYError || particleCountError || lifetimeError || speedError || tError
+    return xError || yError || minTError || maxTError || particleCountError || lifetimeError || speedError || tError
   }
 
   hexToRGB(hex: string) {
@@ -204,37 +215,5 @@ export class ToolbarComponent implements OnInit {
       n = 0
     }
     this.parameters.maxT = n
-  }
-
-  setMinX() {
-    var n = Number(this.ranges.xRange[0])
-    if (isNaN(n) || !isFinite(n)) {
-      n = 0
-    }
-    this.parameters.xRange[0] = n
-  }
-
-  setMaxX() {
-    var n = Number(this.ranges.xRange[1])
-    if (isNaN(n) || !isFinite(n)) {
-      n = 0
-    }
-    this.parameters.xRange[1] = n
-  }
-  
-  setMinY() {
-    var n = Number(this.ranges.yRange[0])
-    if (isNaN(n) || !isFinite(n)) {
-      n = 0
-    }
-    this.parameters.yRange[0] = n
-  }
-
-  setMaxY() {
-    var n = Number(this.ranges.yRange[1])
-    if (isNaN(n) || !isFinite(n)) {
-      n = 0
-    }
-    this.parameters.yRange[1] = n
   }
 }

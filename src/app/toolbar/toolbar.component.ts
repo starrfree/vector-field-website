@@ -121,6 +121,25 @@ export class ToolbarComponent implements OnInit {
     // window.location.href = 'http://localhost:4200'
   }
 
+  openSphere() {
+    this.activatedRoute.queryParamMap.subscribe((map: any) => {
+      if (this.location.path(true) !== '') {
+        var params: any = {...this.parameters}
+        params.t = 0
+        delete params['xRange']
+        delete params['yRange']
+        delete params['zRange']
+        delete params['showAxes']
+        params.showCube = true
+        var url = this.router.createUrlTree(['vectorfield2s.starfree.app/'], {relativeTo: this.activatedRoute, queryParams: params}).toString()
+        url = url.slice(1)
+        window.location.href = 'https://' + url
+      } else {
+        window.location.href = 'https://vectorfield2s.starfree.app/'
+      }
+    })
+  }
+
   goToRoot() {
     this.router.navigate(['/'])
   }

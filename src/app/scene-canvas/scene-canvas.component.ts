@@ -30,8 +30,8 @@ export class SceneCanvasComponent implements OnInit {
   step: number = 0
   size: number = 1
   cubeRotation: number = 0
-  cubeXRotation: number = 0//0.4//0.3
-  cubeYRotation: number = 0//-0.4//-0.15
+  cubeXRotation: number = 0.1
+  cubeYRotation: number = -0.3
 
   xPosition: [number, number] = [0, 0]
 

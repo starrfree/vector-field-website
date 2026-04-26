@@ -472,7 +472,7 @@ export class SceneCanvasComponent implements OnInit {
 
   getMatrices(gl: WebGL2RenderingContext) {
     const fieldOfView = 45 * Math.PI / 180;   // in radians
-    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    const aspect = (gl.canvas as HTMLCanvasElement).clientWidth / (gl.canvas as HTMLCanvasElement).clientHeight;
     const zNear = 0.1;
     const zFar = 100.0;
     var projectionMatrix = mat4.create();
